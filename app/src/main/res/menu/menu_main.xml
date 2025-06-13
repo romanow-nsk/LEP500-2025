@@ -1,0 +1,75 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/action_dir"
+        android:orderInCategory="101"
+        android:title="@string/action_dir"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_addToArchive"
+        android:orderInCategory="103"
+        android:title="@string/action_addToArchive"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_shortOutSide"
+        android:orderInCategory="104"
+        android:title="@string/action_shortOutSide"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_fullOutSide"
+        android:orderInCategory="105"
+        android:title="@string/action_fullOutSide"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="106"
+        android:title="@string/action_delete"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="107"
+        android:title="@string/action_clear"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="108"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_on"
+        android:orderInCategory="109"
+        android:title="Включить BLE"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_off"
+        android:orderInCategory="110"
+        android:title="Выключить BLE"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_measure_start"
+        android:orderInCategory="112"
+        android:title="Измерения"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_measure_stop"
+        android:orderInCategory="113"
+        android:title="Прервать"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_measure_test"
+        android:orderInCategory="114"
+        android:title="Образец"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_bluetooth_battery_level"
+        android:orderInCategory="115"
+        android:title="Уровень заряда"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_convert"
+        android:orderInCategory="116"
+        android:title="Конвертировать в WAVE"
+        app:showAsAction="never" />
+</menu>

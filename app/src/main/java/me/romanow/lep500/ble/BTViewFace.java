@@ -1,0 +1,440 @@
+package me.romanow.lep500.ble;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.ParcelUuid;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import me.romanow.lep500.service.AppData;
+import me.romanow.lep500.I_ListBoxListener;
+import me.romanow.lep500.ListBoxDialog;
+import me.romanow.lep500.MainActivity;
+import me.romanow.lep500.MultiListBoxDialog;
+import me.romanow.lep500.MultiListBoxListener;
+import me.romanow.lep500.OneParameterDialog;
+import me.romanow.lep500.R;
+import romanow.lep500.I_EventListener;
+import romanow.lep500.FFTAudioTextFile;
+
+public class BTViewFace {
+    final public MainActivity face;
+    AppData ctx;
+    public final int SensorMaxNumber=4;
+    private BluetoothLeScanner scanner = null;
+    private ImageView BTState[]=new ImageView[4];
+    private TextView BTStateText[]=new TextView[4];
+    private int BTStateInt[]=new int[4];
+    private ImageView BTScanerState;
+    public final static int BT_Gray=0;
+    public final static int BT_Red=1;
+    public final static int BT_Yellow=2;
+    public final static int BT_Green=3;
+    public final static int BT_LightRed=4;
+    public final static int BT_LightGreen=5;
+    public ArrayList<BTReceiver> sensorList = new ArrayList<>();
+    private final static int BTScanID[]={R.drawable.scan_gray,R.drawable.scan_red,R.drawable.scan_yellow,
+            R.drawable.scan_green,R.drawable.scan_gray,R.drawable.scan_gray};
+    private final static int BTStateID[]={R.drawable.status_gray,R.drawable.status_red,R.drawable.status_yellow,
+            R.drawable.status_green,R.drawable.status_light_red,R.drawable.status_light_green};
+    public BTViewFace(MainActivity face) {
+        this.face = face;
+        ctx = AppData.ctx();
+        }
+    public void init(){
+        BTState[0] = (ImageView) face.findViewById(R.id.headerState0);
+        BTState[1] = (ImageView) face.findViewById(R.id.headerState1);
+        BTState[2] = (ImageView) face.findViewById(R.id.headerState2);
+        BTState[3] = (ImageView) face.findViewById(R.id.headerState3);
+        BTScanerState  = (ImageView) face.findViewById(R.id.headerScanerState);
+        BTScanerState.setImageResource(R.drawable.scan_gray);
+        BTScanerState.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scannerOnOff();
+            }
+        });
+        BTStateText[0] = (TextView) face.findViewById(R.id.headerStateText0);
+        BTStateText[1] = (TextView) face.findViewById(R.id.headerStateText1);
+        BTStateText[2] = (TextView) face.findViewById(R.id.headerStateText2);
+        BTStateText[3] = (TextView) face.findViewById(R.id.headerStateText3);
+        for(int i=0;i<4;i++){
+            final int idx=i;
+            BTState[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (idx>=SensorMaxNumber || idx>=sensorList.size())
+                        return;
+                    if (!sensorList.get(idx).isReady())
+                        return;
+                    new ListBoxDialog(face, MenuItems, getSensorName(sensorList.get(idx)), new I_ListBoxListener() {
+                        @Override
+                        public void onSelect(int index) {
+                            procMenuItem(sensorList.get(idx),idx,index);
+                            }
+                        @Override
+                        public void onLongSelect(int index) {}
+                        @Override
+                        public void onCancel() {}
+                    }).create();
+                    }
+                });
+            }
+        }
+    private void initView(){
+        for(int i=0;i<4;i++){
+            BTStateInt[i]=BT_Gray;
+            BTStateText[i].setText("");
+            BTState[i].setImageResource(BTStateID[BT_Gray]);
+            }
+        }
+    private void setCurrentView(){
+        for(int i=0;i<4;i++){
+            if (i<sensorList.size()){
+                BTStateText[i].setText("");
+                BTState[i].setImageResource(BTStateID[BT_Gray]);
+            }
+            else{
+                BTStateText[i].setText(getSensorName(sensorList.get(i)));
+                BTState[i].setImageResource(BTStateInt[i]);
+            }
+        }
+    }
+    private void setBTScanerState(int state){
+        BTScanerState.setImageResource(BTScanID[state]);
+        }
+    private void setBTPopup(BTReceiver receiver,String text){
+        int idx = sensorList.indexOf(receiver);
+        if (idx!=-1 && idx < SensorMaxNumber)
+            face.popupInfo(getSensorName(receiver)+":"+text);
+        }
+    private synchronized void setBTName(final BTReceiver receiver){
+        face.guiCall(new Runnable() {
+            @Override
+            public void run() {
+                int idx = sensorList.indexOf(receiver);
+                if (idx!=-1 && idx < SensorMaxNumber){
+                    BTStateText[idx].setText(getSensorName(true,receiver));
+                }
+            }
+        });
+    }
+    private synchronized void setBTState(final BTReceiver receiver,final int state){
+        face.guiCall(new Runnable() {
+            @Override
+            public void run() {
+                int idx = sensorList.indexOf(receiver);
+                if (idx!=-1 && idx < SensorMaxNumber){
+                    BTStateInt[idx]=state;
+                    BTState[idx].setImageResource(BTStateID[state]);
+                }
+            }
+        });
+    }
+    private synchronized void setBTState(final BTReceiver receiver){
+        face.guiCall(new Runnable() {
+            @Override
+            public void run() {
+                int idx = sensorList.indexOf(receiver);
+                if (idx!=-1 && idx < SensorMaxNumber){
+                    BTState[idx].setImageResource(BTStateID[idx]);
+                    BTStateText[idx].setText(getSensorName(true,receiver));
+                }
+            }
+        });
+    }
+    private synchronized void setBTStateText(final BTReceiver receiver,final String text){
+        face.guiCall(new Runnable() {
+            @Override
+            public void run() {
+                int idx = sensorList.indexOf(receiver);
+                if (idx!=-1 && idx < SensorMaxNumber){
+                    BTStateText[idx].setText(text);
+                }
+            }
+        });
+    }
+
+    private boolean scannerOn=false;
+    public void scannerOnOff(){
+        if (!scannerOn)
+            blueToothOn();
+        else
+            scannerOff();
+        }
+    public void blueToothOn(){
+        blueToothOff();
+        BluetoothAdapter bluetooth= BluetoothAdapter.getDefaultAdapter();
+        if(bluetooth==null) {
+            face.addToLog("Нет модуля BlueTooth");
+            setBTScanerState(BT_Red);
+            return;
+        }
+        if (!bluetooth.isEnabled()) {
+            // Bluetooth выключен. Предложим пользователю включить его.
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            face.startActivityForResult(enableBtIntent, face.REQUEST_ENABLE_BT);
+            return;
+            }
+        bluetooth.setName(face.BT_OWN_NAME);
+        int btState= bluetooth.getState();
+        if (btState==BluetoothAdapter.STATE_ON){
+            face.clearLog();
+            face.addToLog("Состояние BlueTooth: включен");
+            setBTScanerState(BT_Green);
+            }
+        if (btState==BluetoothAdapter.STATE_TURNING_ON){
+            face.addToLog("Состояние BlueTooth: включается");
+            setBTScanerState(BT_Yellow);
+            }
+        if (btState==BluetoothAdapter.STATE_OFF){
+            face.addToLog("Состояние BlueTooth: выключен");
+            setBTScanerState(BT_Red);
+            }
+        if (btState==BluetoothAdapter.STATE_TURNING_OFF){
+            face.addToLog("Состояние BlueTooth: выключается");
+            setBTScanerState(BT_Yellow);
+        }
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        //adapter.startDiscovery();
+        scanner = adapter.getBluetoothLeScanner();
+        if (scanner != null) {
+            sensorList.clear();
+            List<ScanFilter> filters = new ArrayList<>();
+            int filterMode=0;
+            // ----------------- Сканирование по UUID
+            if (filterMode==1){
+                UUID BLP_SERVICE_UUID = UUID.fromString(BTReceiver.UUID_SERVICE_STR);
+                ScanFilter filter = new ScanFilter.Builder()
+                        .setServiceUuid(new ParcelUuid(BLP_SERVICE_UUID)).build();
+                filters.add(filter);
+            }
+            // --------------- Сканирование по имени
+            if (filterMode==2) {
+                String[] names = new String[]{face.BT_SENSOR_NAME_PREFIX};
+                for (String name : names) {
+                    ScanFilter filter = new ScanFilter.Builder().setDeviceName(name).build();
+                    filters.add(filter);
+                }
+            }
+            ScanSettings scanSettings = new ScanSettings.Builder()
+                    //.setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                    .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+                    .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
+                    .setReportDelay(0L)
+                    .build();
+            scanner.startScan(filters, scanSettings, BTScanCallback);
+            initView();
+            face.popupAndLog("Сканирование началось");
+            scannerOn=true;
+            scannerHandler.postDelayed(scanerTimeOut,face.BT_SCANNING_TIME_IN_SEC*1000);
+            }
+        else{
+            face.popupAndLog("Сканер BleuTooth не получен");
+            setBTScanerState(BT_Red);
+            return;
+            }
+        }
+    public void blueToothOff(){
+        for(BTReceiver receiver : sensorList)
+            receiver.blueToothOff();
+        sensorList.clear();
+        setBTScanerState(BT_Gray);
+        }
+    public void startScanner(){
+        if (scanner!=null)
+            scanner.stopScan(BTScanCallback);
+        setBTScanerState(BT_Gray);
+        }
+    //----------------------------------------------------------------------------------------------
+    public void selectSensor(final SensorListener listener){
+        if (sensorList.size()==0){
+            face.popupAndLog("Нет включенных датчиков");
+            return;
+            }
+        ArrayList<String> sensorNames = new ArrayList<>();
+        for(BTReceiver receiver : sensorList)
+            sensorNames.add(getSensorName(receiver));
+        new ListBoxDialog(face, sensorNames, "Датчик", new I_ListBoxListener() {
+            @Override
+            public void onSelect(int index) {
+                listener.onSensor(sensorList.get(index));
+            }
+            @Override
+            public void onLongSelect(int index) { }
+            @Override
+            public void onCancel() {}
+        }
+            ).create();
+        }
+    public void selectSensorGroup(final SensorGroupListener listener){
+        if (sensorList.size()==0){
+            face.popupAndLog("Нет включенных датчиков");
+            return;
+        }
+        ArrayList<String> sensorNames = new ArrayList<>();
+        for(BTReceiver receiver : sensorList)
+            sensorNames.add(getSensorName(receiver));
+        new MultiListBoxDialog(face,  "Датчики (старт)", sensorNames, new MultiListBoxListener() {
+            @Override
+            public void onSelect(boolean[] selected) {
+                ArrayList<BTReceiver> out = new ArrayList<>();
+                for(int i=0;i<selected.length;i++)
+                    if (selected[i])
+                        out.add(sensorList.get(i));
+                listener.onSensor(out);
+                }
+            });
+        }
+    //----------------------------------------------------------------------------------------------
+    private void scannerOff(){
+        if (scanner!=null)
+            scanner.stopScan(BTScanCallback);
+        setBTScanerState(BT_Gray);
+        scannerOn=false;
+        scannerHandler.removeCallbacks(scanerTimeOut);
+        }
+    Handler scannerHandler = new Handler();
+    Runnable scanerTimeOut = new Runnable() {
+        @Override
+        public void run() {
+            face.addToLog("Тайм-аут сканирования");
+            scannerOff();
+            }
+        };
+    public String getSensorName(BTReceiver receiver){
+        return getSensorName(false,receiver);
+        }
+    public String getSensorName(boolean shortName,BTReceiver receiver){
+        BTDescriptor descriptor = ctx.set().addressMap.get(receiver.getSensorMAC());
+        return descriptor==null ? receiver.getSensorName()+" "+(shortName ? "" : receiver.getSensorMAC()) : descriptor.btName;
+        }
+    private BTReceiver isMACAddressPresent(String ss){
+        for(BTReceiver receiver : sensorList)
+            if (receiver.getSensorMAC().equals(ss))
+                return receiver;
+        return null;
+        }
+    //----------------------------------------------------------------------------------------------
+    private final ScanCallback BTScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(final int callbackType, final ScanResult result) { // Синхронизация сканирования
+            face.guiCall(new Runnable() {
+                @Override
+                public void run() {
+                    BluetoothDevice device = result.getDevice();
+                    if (device.getName()==null)
+                        return;
+                    face.addToLog(true,"BlueTooth("+callbackType+"): "+device.getName()+" "+device.getAddress());
+                    BTReceiver oldReceiver = isMACAddressPresent(device.getAddress());
+                    if (oldReceiver!=null){
+                        face.addToLog(true,"повторное сканирование BlueTooth: "+device.getAddress());
+                        oldReceiver.blueToothRetry();
+                        return;
+                        }
+                    if (device.getName().startsWith(face.BT_SENSOR_NAME_PREFIX)){
+                        face.addToLog(true,"BlueTooth: "+device.getName()+" подключение");
+                        BTReceiver receiver = new BTReceiver(BTViewFace.this,BTBack);
+                        receiver.blueToothOn(device);
+                        sensorList.add(receiver);
+                        }
+                    }
+                });
+            }
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            face.addToLog("Группа результатов: "+results.size());
+            }
+        @Override
+        public void onScanFailed(int errorCode) {
+            face.errorMes("Ошибка сканера: "+errorCode);
+            }
+        };
+    //---------------------------------------------------------------------------------------------------------
+    public BTListener BTBack = new BTListener() {
+        @Override
+        public void notify(BTReceiver sensor, boolean fullInfoMes, String ss) {
+            face.addToLog(fullInfoMes,getSensorName(sensor)+": "+ss);
+            }
+        @Override
+        public void onReceive(BTReceiver sensor, FFTAudioTextFile file){
+            face.saveBTFile(sensor,file);
+            setBTState(sensor,BT_Green);
+            setBTName(sensor);
+            }
+        @Override
+        public void onState(BTReceiver sensor, int state) {
+            setBTState(sensor,state);
+            }
+        @Override
+        public void onStateText(BTReceiver sensor, String text) {
+            setBTStateText(sensor,text);
+            }
+        @Override
+        public void onPopup(BTReceiver sensor, String text) {
+            setBTPopup(sensor,text);
+            }
+    };
+    //------------------------------------------------------------------------------------------
+    private String[] MenuItems = {
+        "Выключить",
+        "Измерение",
+        "Имя датчика",
+        "Уровень заряда",
+        "Прервать"
+        };
+    public void offAll(){
+        for(BTReceiver receiver : sensorList){
+            receiver.deviceOff();
+            receiver.blueToothOff();
+            }
+        }
+    public void procMenuItem(final BTReceiver receiver, final int recIdx, final int menuIdx) {
+        switch (menuIdx) {
+    case 0:
+            receiver.deviceOff();
+            receiver.blueToothOff();
+            break;
+    case 1:
+            String name = getSensorName(receiver).replace("_","-");
+            BTTextFile file = new BTTextFile(ctx.set(),name, face.getGpsService().lastGPS());
+            receiver.startMeasure(file,false);
+            break;
+    case 2:
+            final BTDescriptor descriptor = ctx.set().addressMap.get(receiver.getSensorMAC());
+            new OneParameterDialog(face, "Имя датчика",receiver.getSensorMAC(),descriptor==null ? "" : descriptor.btName, false, true,new I_EventListener() {
+                @Override
+                public void onEvent(String ss) {
+                    if (descriptor!=null)
+                        descriptor.btName = ss;
+                    else
+                        ctx.set().knownSensors.add(new BTDescriptor(ss,receiver.getSensorMAC()));
+                    ctx.set().createMaps();
+                    face.saveContext();
+                    BTStateText[recIdx].setText(getSensorName(receiver));
+                    }
+                });
+            break;
+    case 3:
+            receiver.getChargeLevel();
+            break;
+    case 4:
+           receiver.stopMeasure();
+           break;
+           }
+        }
+    }

@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "me.romanow.lep500"
+        minSdk 30
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    //implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.12.0'
+    //testImplementation 'junit:junit:4.13.2'
+    //androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    //androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+        // https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu - конфликт
+        //implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+        // Облегчённая библиотека, содержит только карту, слой пробок,
+        // LocationManager, UserLocationLayer и возможность скачивать оффлайн карты (только в платной версии).
+        implementation 'com.yandex.android:maps.mobile:4.16.0-navikit'
+        //implementation 'androidx.core:core-ktx:1.7.0'
+        //implementation 'androidx.appcompat:appcompat:1.7.1'
+        //implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+        //implementation 'com.google.android.material:material:1.12.0'  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar', '*.so'], exclude: [])
+        implementation fileTree(dir: 'libs', include: ['*.jar'], exclude: [])
+        //testImplementation 'junit:junit:4.12'
+        //androidTestImplementation 'androidx.test.ext:junit:1.2.1'      //!!!!!!!!!!!!!!!
+        //androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'   //!!!!!!!!!!!!!!!!!!!!!
+        //-------------------------------------------------------NN--------------------------------------
+        //https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-nn
+        //implementation group: 'org.deeplearning4j', name: 'deeplearning4j-nn', version: '1.0.0-M2'
+        //https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-datasets
+        //implementation group: 'org.deeplearning4j', name: 'deeplearning4j-datasets', version: '1.0.0-M2'
+        //compile (group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-M1') {
+        //    exclude group: 'org.bytedeco.javacpp-presets', module: 'opencv-platform'
+        //    exclude group: 'org.bytedeco.javacpp-presets', module: 'leptonica-platform'
+        //    exclude group: 'org.bytedeco.javacpp-presets', module: 'hdf5-platform'
+        //    exclude group: "javax.activation", module: 'activation'
+        //    }
+        //compile (group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-M1', classifier: "android-arm")
+        //compile (group: 'org.bytedeco.javacpp-presets', name: 'openblas', version: '0.3.0-1.4.2', classifier: "android-arm")
+        //compile (group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '3.4.2-1.4.2', classifier: "android-arm")
+        //compile (group: 'org.bytedeco.javacpp-presets', name: 'leptonica', version: '1.76.0-1.4.2', classifier: "android-arm")
+        //---------------------------------------------------------------------
+        //implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M1'
+        //implementation 'org.nd4j:nd4j-native:1.0.0-M1'
+        //implementation 'org.nd4j:nd4j-native:1.0.0-M1:android-arm'
+        //-------------------------------------------------------NN--------------------------------------
+        implementation files('libs\\GraphView-3.1.4.jar')
+        //-------------- Ядро без библиотек ------------------------------------------------------------
+    implementation group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.9.0'
+    implementation group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.9.0'
+    implementation group: 'joda-time', name: 'joda-time', version: '2.10.14'
+    implementation group: 'org.jetbrains', name: 'annotations', version: '23.0.0'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2'
+    implementation group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.19'
+
+    implementation files('libs\\LEP500Core.jar')
+    // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
+    implementation group: 'javax.mail', name: 'javax.mail-api', version: '1.6.1'
+    // https://mvnrepository.com/artifact/org.apache.poi/poi
+    //implementation group: 'org.apache.poi', name: 'poi', version: '3.17'
+}

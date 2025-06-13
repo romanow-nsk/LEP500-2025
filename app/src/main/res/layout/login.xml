@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/dialogStroke"
+    >
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/dialogStroke"
+        >
+    
+    <TextView
+        android:id="@+id/xx11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Логин"
+        android:textColor="@color/White"
+        android:textSize="@dimen/txt_normal" 
+        />
+    <EditText
+        android:id="@+id/main_login"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/high_normal"
+        android:background="@drawable/background_head"
+        android:textColor="@color/Yellow"
+        android:text="android"
+        android:textSize="@dimen/txt_normal" 
+        android:paddingLeft="5dp"
+        android:layout_alignTop="@+id/xx11"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/xx11" />
+    <TextView
+        android:id="@+id/xx12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/xx11"
+        android:layout_below="@+id/xx11"
+        android:layout_marginTop="@dimen/step_normal"
+        android:text="Пароль"
+        android:textColor="@color/White"
+        android:textSize="@dimen/txt_normal" />
+    <EditText
+        android:id="@+id/main_password"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/high_normal"
+        android:background="@drawable/background_head"
+        android:textColor="@color/Yellow"
+        android:paddingLeft="5dp"
+        android:textSize="@dimen/txt_normal" 
+        android:layout_alignTop="@+id/xx12"
+        android:layout_alignLeft="@+id/main_login"
+        android:layout_marginRight="10dp"
+        android:text="pi31415926"
+        android:inputType="textPassword" >
+    </EditText>
+    <Button
+        style="@style/BlackButton"
+        android:id="@+id/main_press"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/high_normal"
+        android:text="Войти"
+        android:textSize="@dimen/txt_normal" 
+        android:paddingLeft="5dp"
+        android:textColor="@color/Yellow"
+        android:layout_alignTop="@+id/main_profile"
+        android:layout_alignRight="@+id/main_password"
+        android:layout_alignLeft="@+id/main_password"
+        tools:ignore="UnknownId"/>
+    <ImageView
+        android:id="@+id/main_profile"
+        android:layout_width="@dimen/image_big"
+        android:layout_height="@dimen/image_big"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="10dp" 
+        android:layout_marginLeft="10dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/network" />
+
+    </RelativeLayout>
+    
+   </RelativeLayout>
+
+
