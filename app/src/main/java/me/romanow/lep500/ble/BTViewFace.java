@@ -32,11 +32,11 @@ import romanow.lep500.FFTAudioTextFile;
 public class BTViewFace {
     final public MainActivity face;
     AppData ctx;
-    public final int SensorMaxNumber=4;
+    public final static int SensorMaxNumber=8;
     private BluetoothLeScanner scanner = null;
-    private ImageView BTState[]=new ImageView[4];
-    private TextView BTStateText[]=new TextView[4];
-    private int BTStateInt[]=new int[4];
+    private ImageView BTState[]=new ImageView[SensorMaxNumber];
+    private TextView BTStateText[]=new TextView[SensorMaxNumber];
+    private int BTStateInt[]=new int[SensorMaxNumber];
     private ImageView BTScanerState;
     public final static int BT_Gray=0;
     public final static int BT_Red=1;
@@ -58,6 +58,10 @@ public class BTViewFace {
         BTState[1] = (ImageView) face.findViewById(R.id.headerState1);
         BTState[2] = (ImageView) face.findViewById(R.id.headerState2);
         BTState[3] = (ImageView) face.findViewById(R.id.headerState3);
+        BTState[4] = (ImageView) face.findViewById(R.id.headerState4);
+        BTState[5] = (ImageView) face.findViewById(R.id.headerState5);
+        BTState[6] = (ImageView) face.findViewById(R.id.headerState6);
+        BTState[7] = (ImageView) face.findViewById(R.id.headerState7);
         BTScanerState  = (ImageView) face.findViewById(R.id.headerScanerState);
         BTScanerState.setImageResource(R.drawable.scan_gray);
         BTScanerState.setOnClickListener(new View.OnClickListener() {
@@ -70,8 +74,16 @@ public class BTViewFace {
         BTStateText[1] = (TextView) face.findViewById(R.id.headerStateText1);
         BTStateText[2] = (TextView) face.findViewById(R.id.headerStateText2);
         BTStateText[3] = (TextView) face.findViewById(R.id.headerStateText3);
+        BTStateText[4] = (TextView) face.findViewById(R.id.headerStateText4);
+        BTStateText[5] = (TextView) face.findViewById(R.id.headerStateText5);
+        BTStateText[6] = (TextView) face.findViewById(R.id.headerStateText6);
+        BTStateText[7] = (TextView) face.findViewById(R.id.headerStateText7);
         for(int i=0;i<4;i++){
+            BTState[i].setOnClickListener(new CommonListener(i));
+            BTStateText[i].setOnClickListener(new CommonListener(i));
             final int idx=i;
+            //--------------------------------------------------------------------------------------
+            /*
             BTState[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -91,8 +103,35 @@ public class BTViewFace {
                     }).create();
                     }
                 });
+             */
             }
         }
+    //----------------------------------------------------------------------------------------------------------------
+    private class CommonListener implements View.OnClickListener {
+        private int idx=0;
+        public CommonListener(int idx0){
+            super();
+            idx = idx0;
+            }
+        @Override
+        public void onClick(View v) {
+            if (idx>=SensorMaxNumber || idx>=sensorList.size())
+                return;
+            if (!sensorList.get(idx).isReady())
+                return;
+            new ListBoxDialog(face, MenuItems, getSensorName(sensorList.get(idx)), new I_ListBoxListener() {
+                @Override
+                public void onSelect(int index) {
+                    procMenuItem(sensorList.get(idx),idx,index);
+                }
+                @Override
+                public void onLongSelect(int index) {}
+                @Override
+                public void onCancel() {}
+            }).create();
+        }
+    }
+    //-----------------------------------------------------------------------------------------------------------------
     private void initView(){
         for(int i=0;i<4;i++){
             BTStateInt[i]=BT_Gray;

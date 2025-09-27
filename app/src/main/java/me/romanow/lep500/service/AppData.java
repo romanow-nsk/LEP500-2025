@@ -37,7 +37,7 @@ import romanow.abc.core.utils.OwnDateTime;
 import romanow.lep500.FileDescriptionList;
 
 public class AppData extends Application {
-    public final static String apkVersion = "3.0.01, 13.06.2025";
+    public final static String apkVersion = "3.0.02, 27.09.2025";
     private final static String codeGenPassword="pi31415926";
     public final static String MAPKIT_API_KEY = "fda3e521-bbc6-4c75-9ec7-ccd4fdaa34d3";
     public final static int PopupShortDelay=4;              // Время короткого popup
