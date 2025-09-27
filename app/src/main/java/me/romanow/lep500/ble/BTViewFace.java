@@ -47,8 +47,8 @@ public class BTViewFace {
     public ArrayList<BTReceiver> sensorList = new ArrayList<>();
     private final static int BTScanID[]={R.drawable.scan_gray,R.drawable.scan_red,R.drawable.scan_yellow,
             R.drawable.scan_green,R.drawable.scan_gray,R.drawable.scan_gray};
-    private final static int BTStateID[]={R.drawable.status_gray,R.drawable.status_red,R.drawable.status_yellow,
-            R.drawable.status_green,R.drawable.status_light_red,R.drawable.status_light_green};
+    private final static int BTStateID[]={R.drawable.ballgray,R.drawable.ballred,R.drawable.ballyellow,
+            R.drawable.ballgreen,R.drawable.balldarkyellow,R.drawable.balldarkgreen};
     public BTViewFace(MainActivity face) {
         this.face = face;
         ctx = AppData.ctx();
@@ -78,7 +78,7 @@ public class BTViewFace {
         BTStateText[5] = (TextView) face.findViewById(R.id.headerStateText5);
         BTStateText[6] = (TextView) face.findViewById(R.id.headerStateText6);
         BTStateText[7] = (TextView) face.findViewById(R.id.headerStateText7);
-        for(int i=0;i<4;i++){
+        for(int i=0;i<SensorMaxNumber;i++){
             BTState[i].setOnClickListener(new CommonListener(i));
             BTStateText[i].setOnClickListener(new CommonListener(i));
             final int idx=i;
@@ -133,14 +133,14 @@ public class BTViewFace {
     }
     //-----------------------------------------------------------------------------------------------------------------
     private void initView(){
-        for(int i=0;i<4;i++){
+        for(int i=0;i<SensorMaxNumber;i++){
             BTStateInt[i]=BT_Gray;
             BTStateText[i].setText("");
             BTState[i].setImageResource(BTStateID[BT_Gray]);
             }
         }
     private void setCurrentView(){
-        for(int i=0;i<4;i++){
+        for(int i=0;i<SensorMaxNumber;i++){
             if (i<sensorList.size()){
                 BTStateText[i].setText("");
                 BTState[i].setImageResource(BTStateID[BT_Gray]);
