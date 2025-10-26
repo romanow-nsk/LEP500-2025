@@ -31,11 +31,13 @@ public class MIExportAndSendMail extends MenuItem{
     private I_ArchiveMultiSelector exportAndSendMailSelector = new I_ArchiveMultiSelector() {
         @Override
         public void onSelect(FileDescriptionList fdlist, boolean longClick) {
+            FFTExcelAdapter adapter = new FFTExcelAdapter(main);
             for(FileDescription fd : fdlist) {
                 try {
                     String pathName = AppData.ctx().androidFileDirectory() + "/" + fd.getOriginalFileName();
                     FileInputStream fis = new FileInputStream(pathName);
-                    main.processInputStream(false, fd, fis, "", new FFTExcelAdapter(main, "", fd));
+                    adapter.nextStep("",fd);
+                    main.processInputStream(false, fd, fis, "", adapter);
                     } catch (Throwable e) {
                         main.errorMes("Файл не открыт: " + fd.getOriginalFileName() + "\n" + main.createFatalMessage(e, 10));
                         }
@@ -49,14 +51,11 @@ public class MIExportAndSendMail extends MenuItem{
                 ArrayList<Uri> uris = new ArrayList<Uri>();
                 for(FileDescription fd : fdlist){
                     emailIntent.putExtra(Intent.EXTRA_TEXT, "Датчик: " + fd.toString());
-                    String filePath = new FFTExcelAdapter(main, "", fd).createOriginalExcelFileName();
-                    File ff = new File(filePath);
-                    Uri fileUri = FileProvider.getUriForFile(main, BuildConfig.APPLICATION_ID, ff);
-                    uris.add(fileUri);
-                    //--------------- Старое -------------------------------------------------------
-                    //emailIntent.putExtra(android.content.Intent.EXTRA_STREAM,Uri.fromFile(ff));
-                    //emailIntent.putExtra(android.content.Intent.EXTRA_STREAM,Uri.parse(filePath));
                     }
+                String filePath = adapter.createExcel();
+                File ff = new File(filePath);
+                Uri fileUri = FileProvider.getUriForFile(main, BuildConfig.APPLICATION_ID, ff);
+                uris.add(fileUri);
                 emailIntent.putExtra(Intent.EXTRA_STREAM,uris);
                 main.startActivity(Intent.createChooser(emailIntent, "Отправка письма..."));
                 //----------------- Читстить каталог после отправки

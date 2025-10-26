@@ -1,7 +1,11 @@
 package me.romanow.lep500;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xddf.usermodel.PresetLineDash;
 import org.apache.poi.xddf.usermodel.XDDFLineProperties;
 import org.apache.poi.xddf.usermodel.XDDFPresetLineDash;
@@ -33,6 +37,7 @@ import java.util.StringTokenizer;
 import me.romanow.lep500.service.AppData;
 import me.romanow.lep500.service.BaseActivity;
 import romanow.abc.core.constants.Values;
+import romanow.abc.core.utils.OwnDateTime;
 import romanow.abc.core.utils.Pair;
 import romanow.lep500.FileDescription;
 import romanow.lep500.fft.*;
@@ -40,9 +45,33 @@ import romanow.lep500.fft.*;
 import static me.romanow.lep500.MainActivity.createFatalMessage;
 
 public class FFTExcelAdapter implements FFTCallBackPlus {
+    public class RowList {
+        public final XSSFSheet sheet;
+        private ArrayList<Row> rows = new ArrayList<>();
+        public  RowList(XSSFSheet sheet0){
+            sheet = sheet0;
+            }
+        public Row get(int idx){
+            int sz = rows.size();
+            while (idx>=sz)
+                rows.add(sheet.createRow(sz++));
+            return rows.get(idx);
+            }
+        }
+    private final static int MainSheetRows=30;
     private FFTStatistic inputStat;
     private MainActivity main;
     private FileDescription fd;
+    private XSSFWorkbook workbook;
+    private RowList  mainRows;
+    private RowList  dataRows;
+    private int callNum=-1;             // Для многократного вызова
+    public void nextStep(String title, FileDescription fd0){
+        inputStat = new FFTStatistic(title);
+        inputStat.setFreq(fd0.getFileFreq());
+        fd = fd0;
+        callNum++;
+        }
     public String createOriginalExcelFileName(){
         String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
         File ff = new File(dirName);
@@ -54,11 +83,21 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         pathName = pathName.substring(0, k) + ".xlsx";
         return pathName;
         }
-    public FFTExcelAdapter(BaseActivity main0, String title, FileDescription fd0){
-        inputStat = new FFTStatistic(title);
-        inputStat.setFreq(fd0.getFileFreq());
+    public FFTExcelAdapter(BaseActivity main0){
         main = (MainActivity) main0;
-        fd = fd0;
+        workbook = new XSSFWorkbook();
+        mainRows =new RowList(workbook.createSheet("Результаты"));
+        mainRows.get(0).createCell(0).setCellValue("Файл:");
+        mainRows.get(1).createCell(0).setCellValue("Геолокация:");
+        mainRows.get(2).createCell(0).setCellValue("Линия:");
+        mainRows.get(3).createCell(0).setCellValue("Опора:");
+        mainRows.get(4).createCell(0).setCellValue("Дата создания:");
+        mainRows.get(5).createCell(0).setCellValue("Частота:");
+        mainRows.get(6).createCell(0).setCellValue("Датчик:");
+        mainRows.get(7).createCell(0).setCellValue("Номер измерения:");
+        mainRows.get(8).createCell(0).setCellValue("Частот в спектре:");
+        mainRows.get(9).createCell(0).setCellValue("Оценка:");
+        mainRows.get(10).createCell(0).setCellValue("Анализ:");
         }
     @Override
     public void onStart(double msOnStep) {}
@@ -77,39 +116,36 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
             main.addToLog("Экстремумов не найдено");
             return;
             }
-        Extreme extreme;
-        XSSFWorkbook workbook = new XSSFWorkbook();
         //------------------------------------------------------------------------------------------
-        XSSFSheet sheet = workbook.createSheet("Параметры");
-        Row hd;
-        hd = sheet.createRow(0);
-        hd.createCell(0).setCellValue("Геолокация: "+fd.getGps().toString());
-        hd = sheet.createRow(1);
-        hd.createCell(0).setCellValue("Линия: "+fd.getPowerLine());
-        hd = sheet.createRow(2);
-        hd.createCell(0).setCellValue("Опора: "+fd.getSupport());
-        hd = sheet.createRow(2);
-        hd.createCell(0).setCellValue("Дата создания: "+fd.getCreateDate().dateTimeToString());
-        hd = sheet.createRow(3);
-        hd.createCell(0).setCellValue("Частота: "+String.format("%6.2f",fd.getFileFreq()));
-        hd = sheet.createRow(4);
-        hd.createCell(0).setCellValue("Датчик: "+fd.getSensor());
-        hd = sheet.createRow(5);
-        hd.createCell(0).setCellValue("Номер измерения: "+fd.getMeasureCounter());
+        int colIdx = callNum+1;
+        mainRows.get(0).createCell(colIdx).setCellValue(fd.getOriginalFileName());
+        mainRows.get(1).createCell(colIdx).setCellValue(fd.getGps().toString());
+        mainRows.get(2).createCell(colIdx).setCellValue(fd.getPowerLine());
+        mainRows.get(3).createCell(colIdx).setCellValue(fd.getSupport());
+        mainRows.get(4).createCell(colIdx).setCellValue(fd.getCreateDate().dateTimeToString());
+        mainRows.get(5).createCell(colIdx).setCellValue(String.format("%6.2f",fd.getFileFreq()));
+        mainRows.get(6).createCell(colIdx).setCellValue(fd.getSensor());
+        mainRows.get(7).createCell(colIdx).setCellValue(fd.getMeasureCounter());
         double dd[] = inputStat.getNormalized();
-        hd = sheet.createRow(6);
-        hd.createCell(0).setCellValue("Частот в спектре: "+dd.length);
+        mainRows.get(8).createCell(colIdx).setCellValue(dd.length);
         Pair<String,Integer> ss = list.testAlarm2(AppData.ctx().set(),inputStat.getFreqStep());
         if (ss.o1!=null){
-            hd = sheet.createRow(7);
-            hd.createCell(0).setCellValue(ss.o1);
+            StringTokenizer tokenizer = new StringTokenizer(list.getTestComment(),"\n");
+            ArrayList<String> resList = new ArrayList<>();
+            int idx=0;
+            while (tokenizer.hasMoreTokens()){
+                mainRows.get(10+idx).createCell(colIdx).setCellValue(tokenizer.nextToken());
+                idx++;
+                }
+            mainRows.get(9).createCell(colIdx).setCellValue(ss.o2);
             }
         //------------------------------------------------------------------------------------------
-        sheet = workbook.createSheet("Спектр");
+        XSSFSheet sheet = workbook.createSheet("Спектр-"+(callNum+1));
         double ff0 = AppData.ctx().set().FirstFreq;
         double ff1 = AppData.ctx().set().LastFreq;
         double step = inputStat.getFreqStep();
         int idx0=inputStat.getnFirst();
+        Row hd;
         for(int i=0;i<dd.length-idx0;i++){
             hd = sheet.createRow(i);
             hd.createCell(0).setCellValue(""+(i+1));
@@ -163,32 +199,42 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         //Рисовать
         chart.plot(data);
         //------------------------------------------------------------------------------------------
-        for(int i = 0; i< Values.extremeFacade.length; i++)
+        dataRows = new RowList(workbook.createSheet("Пики-"+(callNum+1)));
+        rowNum=0;
+        for(int i = 0; i< Values.extremeFacade.length; i++){
             writeExtrems(i,workbook);
+            }
         //------------------------------------------------------------------------------------------
-        String pathName = createOriginalExcelFileName();
-        try (FileOutputStream out = new FileOutputStream(new File(pathName))) {
+        }
+    public String createExcel(){
+        String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
+        File ff = new File(dirName);
+        if (!ff.exists()){
+            ff.mkdir();
+            }
+        String pathName = "Измерения ("+(callNum+1)+") "+new OwnDateTime().dateTimeToString()+".xlsx";
+        try (FileOutputStream out = new FileOutputStream(new File(dirName+"/"+pathName))) {
             workbook.write(out);
             out.close();
-            } catch (IOException e) { main.addToLog("Ошибка экспорта: "+e.toString());  }
+        } catch (IOException e) { main.addToLog("Ошибка экспорта: "+e.toString());  }
         main.addToLog("Экспорт в Excel: "+fd.getOriginalFileName());
+        return dirName+"/"+pathName;
         }
+    private int rowNum=0;
     private void writeExtrems(int mode, XSSFWorkbook workbook){
         String ss="";
         try {
             ss=((ExtremeFacade)Values.extremeFacade[mode].newInstance()).getTitle();
             } catch (Exception ee){ }
-        XSSFSheet sheet = workbook.createSheet(ss);
         int sz = inputStat.getMids().length;
         Row hd;
-        int rowNum=0;
-        hd = sheet.createRow(rowNum++);
+        hd = dataRows.get(rowNum++);
         hd.createCell(0).setCellValue("Диапазон экстремумов:");
         hd.createCell(1).setCellValue(AppData.ctx().set().FirstFreq);
         hd.createCell(2).setCellValue(AppData.ctx().set().LastFreq);
         ExtremeList list = inputStat.createExtrems(mode,AppData.ctx().set());
         if (list.data().size()==0){
-            hd = sheet.createRow(1);
+            hd = dataRows.get(rowNum++);
             hd.createCell(0).setCellValue("Экстремумов не найдено");
             return;
             }
@@ -200,12 +246,12 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         while (tokenizer.hasMoreTokens())
             resList.add(tokenizer.nextToken());
         for(String str : resList){
-            hd = sheet.createRow(rowNum++);
+            hd = dataRows.get(rowNum++);
             hd.createCell(0).setCellValue(str);
             }
         Extreme extreme;
         extreme = list.data().get(0);
-        hd = sheet.createRow(rowNum++);
+        hd = dataRows.get(rowNum++);
         hd.createCell(0).setCellValue("Осн. частота:");
         hd.createCell(1).setCellValue( extreme.idx*inputStat.getFreqStep());
         if (extreme.decSize!=-1)
@@ -215,13 +261,13 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         facade.setExtreme(list.data().get(0));
         double val0 = facade.getValue();
         extreme = facade.extreme();
-        hd = sheet.createRow(rowNum++);
+        hd = dataRows.get(rowNum++);
         hd.createCell(0).setCellValue("Ампл");
         hd.createCell(1).setCellValue("\u0394спад");
         hd.createCell(2).setCellValue("\u0394тренд");
         hd.createCell(3).setCellValue("f(гц)");
         hd.createCell(4).setCellValue("Декремент");
-        hd = sheet.createRow(rowNum++);
+        hd = dataRows.get(rowNum++);
         hd.createCell(0).setCellValue(extreme.value);
         hd.createCell(1).setCellValue(extreme.diff);
         hd.createCell(2).setCellValue(extreme.trend);
@@ -235,7 +281,7 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
             double proc = facade.getValue()*100/val0;
             sum+=proc;
             extreme = facade.extreme();
-            hd = sheet.createRow(rowNum++);
+            hd = dataRows.get(rowNum++);
             hd.createCell(0).setCellValue(extreme.value);
             hd.createCell(1).setCellValue(extreme.diff);
             hd.createCell(2).setCellValue(extreme.trend);
@@ -243,7 +289,7 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
             if (extreme.decSize!=-1)
                 hd.createCell(4).setCellValue(Math.PI*extreme.decSize/extreme.idx);
             }
-        hd = sheet.createRow(5+count);
+        hd = dataRows.get(rowNum++);
         hd.createCell(0).setCellValue(String.format("Средний - %d%% к первому",(int)(sum/(count-1))));
         }
     @Override

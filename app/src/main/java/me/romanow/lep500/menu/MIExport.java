@@ -23,15 +23,18 @@ public class MIExport extends MenuItem{
     private I_ArchiveMultiSelector exportSelector = new I_ArchiveMultiSelector() {
         @Override
         public void onSelect(FileDescriptionList flist, boolean longClick) {
+            FFTExcelAdapter adapter = new FFTExcelAdapter(main);
             for(FileDescription fd : flist) {
                 try {
                     String pathName = AppData.ctx().androidFileDirectory() + "/" + fd.getOriginalFileName();
                     FileInputStream fis = new FileInputStream(pathName);
-                    main.processInputStream(false, fd, fis, "", new FFTExcelAdapter(main, "", fd));
+                    adapter.nextStep("",fd);
+                    main.processInputStream(false, fd, fis, "", adapter);
                     } catch (Throwable e) {
                         main.errorMes("Файл не открыт: " + fd.getOriginalFileName() + "\n" + main.createFatalMessage(e, 10));
                         }
                 }
+            adapter.createExcel();
             }
         };
     }
