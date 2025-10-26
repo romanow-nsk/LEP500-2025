@@ -1,7 +1,9 @@
 package me.romanow.lep500;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -21,6 +23,7 @@ import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -57,7 +60,13 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
                 rows.add(sheet.createRow(sz++));
             return rows.get(idx);
             }
+        public Cell createCell(int rowIdx,int colIdx){
+            Cell cc = get(rowIdx).createCell(colIdx);
+            cc.setCellStyle(border);
+            return cc;
+            }
         }
+    private final static int colOffset=4;
     private final static int MainSheetRows=30;
     private FFTStatistic inputStat;
     private MainActivity main;
@@ -66,6 +75,7 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
     private RowList  mainRows;
     private RowList  dataRows;
     private int callNum=-1;             // Для многократного вызова
+    private CellStyle border;
     public void nextStep(String title, FileDescription fd0){
         inputStat = new FFTStatistic(title);
         inputStat.setFreq(fd0.getFileFreq());
@@ -86,18 +96,25 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
     public FFTExcelAdapter(BaseActivity main0){
         main = (MainActivity) main0;
         workbook = new XSSFWorkbook();
+        border = workbook.createCellStyle();
+        border.setBorderTop(BorderStyle.THIN);
+        border.setBorderBottom(BorderStyle.THIN);
+        border.setBorderLeft(BorderStyle.THIN);
+        border.setBorderRight(BorderStyle.THIN);
+        border.setAlignment(HorizontalAlignment.LEFT);
         mainRows =new RowList(workbook.createSheet("Результаты"));
-        mainRows.get(0).createCell(0).setCellValue("Файл:");
-        mainRows.get(1).createCell(0).setCellValue("Геолокация:");
-        mainRows.get(2).createCell(0).setCellValue("Линия:");
-        mainRows.get(3).createCell(0).setCellValue("Опора:");
-        mainRows.get(4).createCell(0).setCellValue("Дата создания:");
-        mainRows.get(5).createCell(0).setCellValue("Частота:");
-        mainRows.get(6).createCell(0).setCellValue("Датчик:");
-        mainRows.get(7).createCell(0).setCellValue("Номер измерения:");
-        mainRows.get(8).createCell(0).setCellValue("Частот в спектре:");
-        mainRows.get(9).createCell(0).setCellValue("Оценка:");
-        mainRows.get(10).createCell(0).setCellValue("Анализ:");
+        mainRows.createCell(0,0).setCellValue("Измерение:");
+        mainRows.createCell(1,0).setCellValue("Файл:");
+        mainRows.createCell(2,0).setCellValue("Геолокация:");
+        mainRows.createCell(3,0).setCellValue("Линия:");
+        mainRows.createCell(4,0).setCellValue("Опора:");
+        mainRows.createCell(5,0).setCellValue("Дата создания:");
+        mainRows.createCell(6,0).setCellValue("Частота:");
+        mainRows.createCell(7,0).setCellValue("Датчик:");
+        mainRows.createCell(8,0).setCellValue("Номер измерения:");
+        mainRows.createCell(9,0).setCellValue("Частот в спектре:");
+        mainRows.createCell(10,0).setCellValue("Оценка:");
+        mainRows.createCell(11,0).setCellValue("Анализ:");
         }
     @Override
     public void onStart(double msOnStep) {}
@@ -111,53 +128,61 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         double max = inputStat.normalizeStart(AppData.ctx().set());
         inputStat.normalizeFinish(max);
         int sz = inputStat.getMids().length;
-        ExtremeList list = inputStat.createExtrems(FFTStatistic.ExtremeAbsMode,AppData.ctx().set());
-        if (list.data().size()==0){
-            main.addToLog("Экстремумов не найдено");
-            return;
-            }
         //------------------------------------------------------------------------------------------
         int colIdx = callNum+1;
-        mainRows.get(0).createCell(colIdx).setCellValue(fd.getOriginalFileName());
-        mainRows.get(1).createCell(colIdx).setCellValue(fd.getGps().toString());
-        mainRows.get(2).createCell(colIdx).setCellValue(fd.getPowerLine());
-        mainRows.get(3).createCell(colIdx).setCellValue(fd.getSupport());
-        mainRows.get(4).createCell(colIdx).setCellValue(fd.getCreateDate().dateTimeToString());
-        mainRows.get(5).createCell(colIdx).setCellValue(String.format("%6.2f",fd.getFileFreq()));
-        mainRows.get(6).createCell(colIdx).setCellValue(fd.getSensor());
-        mainRows.get(7).createCell(colIdx).setCellValue(fd.getMeasureCounter());
+        mainRows.createCell(0,colIdx).setCellValue(colIdx);
+        mainRows.createCell(1,colIdx).setCellValue(fd.getOriginalFileName());
+        mainRows.createCell(2,colIdx).setCellValue(fd.getGps().toString());
+        mainRows.createCell(3,colIdx).setCellValue(fd.getPowerLine());
+        mainRows.createCell(4,colIdx).setCellValue(fd.getSupport());
+        mainRows.createCell(5,colIdx).setCellValue(fd.getCreateDate().dateTimeToString());
+        mainRows.createCell(6,colIdx).setCellValue(String.format("%6.2f",fd.getFileFreq()));
+        mainRows.createCell(7,colIdx).setCellValue(fd.getSensor());
+        mainRows.createCell(8,colIdx).setCellValue(""+fd.getMeasureCounter());
         double dd[] = inputStat.getNormalized();
-        mainRows.get(8).createCell(colIdx).setCellValue(dd.length);
-        Pair<String,Integer> ss = list.testAlarm2(AppData.ctx().set(),inputStat.getFreqStep());
+        mainRows.createCell(9,colIdx).setCellValue(dd.length);
+        ExtremeList list = inputStat.createExtrems(FFTStatistic.ExtremeAbsMode,AppData.ctx().set());
+                if (list.data().size()==0){
+            mainRows.createCell(11,colIdx).setCellValue("Экстремумов не найдено");
+            return;
+            }
+        Pair<String,Integer> ss = list.testAlarmBase(AppData.ctx().set(),inputStat.getFreqStep());
+        mainRows.createCell(10,colIdx).setCellValue(ss.o2);
         if (ss.o1!=null){
             StringTokenizer tokenizer = new StringTokenizer(list.getTestComment(),"\n");
             ArrayList<String> resList = new ArrayList<>();
             int idx=0;
             while (tokenizer.hasMoreTokens()){
-                mainRows.get(10+idx).createCell(colIdx).setCellValue(tokenizer.nextToken());
+                mainRows.createCell(11+idx,colIdx).setCellValue(tokenizer.nextToken());
                 idx++;
                 }
-            mainRows.get(9).createCell(colIdx).setCellValue(ss.o2);
             }
         //------------------------------------------------------------------------------------------
-        XSSFSheet sheet = workbook.createSheet("Спектр-"+(callNum+1));
+        dataRows = new RowList(workbook.createSheet("Измерение-"+(callNum+1)));
         double ff0 = AppData.ctx().set().FirstFreq;
         double ff1 = AppData.ctx().set().LastFreq;
         double step = inputStat.getFreqStep();
         int idx0=inputStat.getnFirst();
         Row hd;
+        Cell cc;
         for(int i=0;i<dd.length-idx0;i++){
-            hd = sheet.createRow(i);
-            hd.createCell(0).setCellValue(""+(i+1));
-            hd.createCell(1).setCellValue(ff0+i*step);
-            hd.createCell(2).setCellValue(dd[i+idx0]);
+            hd = dataRows.get(i);
+            cc = hd.createCell(0);
+            cc.setCellStyle(border);
+            cc.setCellValue(""+(i+1));
+            cc = hd.createCell(1);
+            cc.setCellStyle(border);
+            cc.setCellValue(ff0+i*step);
+            cc=hd.createCell(2);
+            cc.setCellStyle(border);
+            cc.setCellValue(dd[i+idx0]);
             }
         //------------------------------------------------------------------------------------------
         // Создаем холст
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFDrawing drawing = dataRows.sheet.createDrawingPatriarch();
         // Первые четыре значения по умолчанию: 0, [0,5]: начало с 0 столбца и 5 строк; [7,26]: ширина 7 ячеек, 26 расширяется до 26 строк
         // Ширина по умолчанию (14-8) * 12
-        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 5, 20, 40);
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 10, 5, 20, 40);
         // Создаем объект диаграммы
         XSSFChart chart = drawing.createChart(anchor);
         //Заголовок
@@ -183,8 +208,8 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         //    }
         //XDDFNumericalDataSource<Double> ff2 = XDDFDataSourcesFactory.fromArray(dd2);
         //XDDFNumericalDataSource<Double> ff3 = XDDFDataSourcesFactory.fromArray(dd3);
-        XDDFNumericalDataSource<Double> ff2 = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(0, dd.length-1-idx0, 2, 2));
-        XDDFNumericalDataSource<Double> ff3 = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(0, dd.length-1-idx0, 1, 1));
+        XDDFNumericalDataSource<Double> ff2 = XDDFDataSourcesFactory.fromNumericCellRange(dataRows.sheet, new CellRangeAddress(0, dd.length-1-idx0, 2, 2));
+        XDDFNumericalDataSource<Double> ff3 = XDDFDataSourcesFactory.fromNumericCellRange(dataRows.sheet, new CellRangeAddress(0, dd.length-1-idx0, 1, 1));
         // LINE: линейный график,
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
         // Данные загрузки графика, пунктирная линия 1
@@ -199,14 +224,21 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         //Рисовать
         chart.plot(data);
         //------------------------------------------------------------------------------------------
-        dataRows = new RowList(workbook.createSheet("Пики-"+(callNum+1)));
         rowNum=0;
+        int weight = 0;
         for(int i = 0; i< Values.extremeFacade.length; i++){
-            writeExtrems(i,workbook);
+            weight += writeExtrems(i,workbook);
             }
+        mainRows.createCell(10,colIdx).setCellValue(weight);
+        dataRows.sheet.setColumnWidth(colOffset-1,500);
+        dataRows.sheet.setColumnWidth(colOffset+0,9000);
+        dataRows.sheet.setColumnWidth(colOffset+4,4000);
         //------------------------------------------------------------------------------------------
         }
     public String createExcel(){
+        mainRows.sheet.setColumnWidth(0,5000);
+        for(int columnIndex = 0; columnIndex < callNum+1; columnIndex++)
+            mainRows.sheet.setColumnWidth(columnIndex+1,10000);
         String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
         File ff = new File(dirName);
         if (!ff.exists()){
@@ -220,8 +252,9 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         main.addToLog("Экспорт в Excel: "+fd.getOriginalFileName());
         return dirName+"/"+pathName;
         }
+    //----------------------------------------------------------------------------------------------
     private int rowNum=0;
-    private void writeExtrems(int mode, XSSFWorkbook workbook){
+    private int writeExtrems(int mode, XSSFWorkbook workbook){
         String ss="";
         try {
             ss=((ExtremeFacade)Values.extremeFacade[mode].newInstance()).getTitle();
@@ -229,14 +262,14 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         int sz = inputStat.getMids().length;
         Row hd;
         hd = dataRows.get(rowNum++);
-        hd.createCell(0).setCellValue("Диапазон экстремумов:");
-        hd.createCell(1).setCellValue(AppData.ctx().set().FirstFreq);
-        hd.createCell(2).setCellValue(AppData.ctx().set().LastFreq);
+        dataRows.createCell(rowNum,colOffset+0).setCellValue("Диапазон экстремумов:");
+        dataRows.createCell(rowNum,colOffset+1).setCellValue(AppData.ctx().set().FirstFreq);
+        dataRows.createCell(rowNum,colOffset+2).setCellValue(AppData.ctx().set().LastFreq);
+        rowNum++;
         ExtremeList list = inputStat.createExtrems(mode,AppData.ctx().set());
         if (list.data().size()==0){
-            hd = dataRows.get(rowNum++);
-            hd.createCell(0).setCellValue("Экстремумов не найдено");
-            return;
+            dataRows.createCell(rowNum++,colOffset+0).setCellValue("Экстремумов не найдено");
+            return 0;
             }
         //---------------------------------- Анализ -- TODO -------------------------
         Pair<String, Integer> res = list.testAlarm2(AppData.ctx().set(), inputStat.getFreqStep());
@@ -246,34 +279,33 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         while (tokenizer.hasMoreTokens())
             resList.add(tokenizer.nextToken());
         for(String str : resList){
-            hd = dataRows.get(rowNum++);
-            hd.createCell(0).setCellValue(str);
+            dataRows.createCell(rowNum++,colOffset+0).setCellValue(str);
             }
         Extreme extreme;
         extreme = list.data().get(0);
-        hd = dataRows.get(rowNum++);
-        hd.createCell(0).setCellValue("Осн. частота:");
-        hd.createCell(1).setCellValue( extreme.idx*inputStat.getFreqStep());
+        dataRows.createCell(rowNum,colOffset+0).setCellValue("Осн. частота:");
+        dataRows.createCell(rowNum,colOffset+1).setCellValue( extreme.idx*inputStat.getFreqStep());
+        rowNum++;
         if (extreme.decSize!=-1)
-            hd.createCell(2).setCellValue( Math.PI*extreme.decSize/extreme.idx);
+            dataRows.createCell(rowNum,colOffset+2).setCellValue( Math.PI*extreme.decSize/extreme.idx);
         int count = main.nFirstMax < list.data().size() ? main.nFirstMax : list.data().size();
         ExtremeFacade facade = list.getFacade();
         facade.setExtreme(list.data().get(0));
         double val0 = facade.getValue();
         extreme = facade.extreme();
-        hd = dataRows.get(rowNum++);
-        hd.createCell(0).setCellValue("Ампл");
-        hd.createCell(1).setCellValue("\u0394спад");
-        hd.createCell(2).setCellValue("\u0394тренд");
-        hd.createCell(3).setCellValue("f(гц)");
-        hd.createCell(4).setCellValue("Декремент");
-        hd = dataRows.get(rowNum++);
-        hd.createCell(0).setCellValue(extreme.value);
-        hd.createCell(1).setCellValue(extreme.diff);
-        hd.createCell(2).setCellValue(extreme.trend);
-        hd.createCell(3).setCellValue(extreme.idx*inputStat.getFreqStep());
+        dataRows.createCell(rowNum,colOffset+0).setCellValue("Ампл");
+        dataRows.createCell(rowNum,colOffset+1).setCellValue("\u0394спад");
+        dataRows.createCell(rowNum,colOffset+2).setCellValue("\u0394тренд");
+        dataRows.createCell(rowNum,colOffset+3).setCellValue("f(гц)");
+        dataRows.createCell(rowNum,colOffset+4).setCellValue("Декремент");
+        rowNum++;
+        dataRows.createCell(rowNum,colOffset+0).setCellValue(extreme.value);
+        dataRows.createCell(rowNum,colOffset+1).setCellValue(extreme.diff);
+        dataRows.createCell(rowNum,colOffset+2).setCellValue(extreme.trend);
+        dataRows.createCell(rowNum,colOffset+3).setCellValue(extreme.idx*inputStat.getFreqStep());
+        rowNum++;
         if (extreme.decSize!=-1)
-            hd.createCell(4).setCellValue(Math.PI*extreme.decSize/extreme.idx);
+            dataRows.createCell(rowNum,4).setCellValue(Math.PI*extreme.decSize/extreme.idx);
         double sum=0;
         for(int i=1; i<count;i++){
             facade = list.getFacade();
@@ -281,16 +313,16 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
             double proc = facade.getValue()*100/val0;
             sum+=proc;
             extreme = facade.extreme();
-            hd = dataRows.get(rowNum++);
-            hd.createCell(0).setCellValue(extreme.value);
-            hd.createCell(1).setCellValue(extreme.diff);
-            hd.createCell(2).setCellValue(extreme.trend);
-            hd.createCell(3).setCellValue(extreme.idx*inputStat.getFreqStep());
+            dataRows.createCell(rowNum,colOffset+0).setCellValue(extreme.value);
+            dataRows.createCell(rowNum,colOffset+1).setCellValue(extreme.diff);
+            dataRows.createCell(rowNum,colOffset+2).setCellValue(extreme.trend);
+            dataRows.createCell(rowNum,colOffset+3).setCellValue(extreme.idx*inputStat.getFreqStep());
             if (extreme.decSize!=-1)
-                hd.createCell(4).setCellValue(Math.PI*extreme.decSize/extreme.idx);
+                dataRows.createCell(rowNum,colOffset+4).setCellValue(Math.PI*extreme.decSize/extreme.idx);
+            rowNum++;
             }
-        hd = dataRows.get(rowNum++);
-        hd.createCell(0).setCellValue(String.format("Средний - %d%% к первому",(int)(sum/(count-1))));
+        dataRows.createCell(rowNum++,colOffset+0).setCellValue(String.format("Средний - %d%% к первому",(int)(sum/(count-1))));
+        return AppData.StateWeight.get(color2);
         }
     @Override
     public boolean onStep(int nBlock, int calcMS, double totalMS, FFT fft) {

@@ -49,9 +49,13 @@ public class MIExportAndSendMail extends MenuItem{
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Звенящие опоры России");
                 emailIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 ArrayList<Uri> uris = new ArrayList<Uri>();
+                String ss="";
+                int idx=1;
                 for(FileDescription fd : fdlist){
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Датчик: " + fd.toString());
+                    ss += "Измерение:"+idx+" " + fd.toString()+"\n";
+                    idx++;
                     }
+                emailIntent.putExtra(Intent.EXTRA_TEXT, ss);
                 String filePath = adapter.createExcel();
                 File ff = new File(filePath);
                 Uri fileUri = FileProvider.getUriForFile(main, BuildConfig.APPLICATION_ID, ff);
