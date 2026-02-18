@@ -18,6 +18,12 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,6 +33,7 @@ import me.romanow.lep500.R;
 import me.romanow.lep500.StoryList;
 import romanow.abc.core.API.RestAPIBase;
 import romanow.abc.core.API.RestAPILEP500;
+import romanow.abc.core.Pair;
 import romanow.abc.core.Utils;
 import romanow.abc.core.constants.Values;
 import romanow.abc.core.entity.base.BugList;
@@ -37,7 +44,7 @@ import romanow.abc.core.utils.OwnDateTime;
 import romanow.lep500.FileDescriptionList;
 
 public class AppData extends Application {
-    public final static String apkVersion = "3.0.03, 27.10.2025";
+    public final static String apkVersion = "3.0.04, 18.02.2026";
     private final static String codeGenPassword="pi31415926";
     public final static String MAPKIT_API_KEY = "fda3e521-bbc6-4c75-9ec7-ccd4fdaa34d3";
     public final static int PopupShortDelay=4;              // Время короткого popup
@@ -76,6 +83,9 @@ public class AppData extends Application {
     public final static String Event_Clock="me.romanow.Clock";             // Таймер
     public final static String Event_GPS="me.romanow.GPS";                 // Изменение состояния GPS
     public final static String Event_Popup="me.romanow.Popup";             // Всплывающее сообщение, параметры header, text
+    public final static String PackageName="me.romanow.lep500";
+    public final static String TrialFileName=".androidSettings";
+    public final static int TrialPeriod=30;
     //----------------------------------------------------------------------------
     public final static ArrayList<String> WinFuncList=new ArrayList<>();{
         WinFuncList.add("Прямоугольник");
@@ -296,4 +306,65 @@ public class AppData extends Application {
         sendPopup(fatal ? R.drawable.problem : R.drawable.info,fatal,false,true,ss);
         }
     //---------------------------------------------------------------------------------------
-}
+    private void saveCurrentTime(String path) throws Exception{
+        DataOutputStream out = new DataOutputStream(new FileOutputStream(path));
+        out.writeLong(System.currentTimeMillis());
+        out.flush();
+        out.close();
+        }
+    private void saveCurrentTime(String path, long dd) throws Exception{
+        DataOutputStream out = new DataOutputStream(new FileOutputStream(path));
+        out.writeLong(dd);
+        out.flush();
+        out.close();
+        }
+    private long loadCurrentTime(String path) throws Exception{
+        DataInputStream in = new DataInputStream(new FileInputStream(path));
+        long dd = in.readLong();
+        in.close();
+        return dd;
+        }
+    public Pair<String,Long> getTrialDayPeriod(){
+        Pair<String,Long> vv = getTrialMinutePeriod();
+        if (vv.o1!=null)
+            return vv;
+        else
+            return new Pair<>(vv.o1,vv.o2/24/60);
+        }
+    public Pair<String,Long> getTrialMinutePeriod(){
+        //--------------------------- Файл помимо каталога приложения
+        String ss = androidFileDirectory();
+        String fName1 = androidFileDirectory()+"/"+TrialFileName;
+        String fName2 = androidFileDirectory()+"/"+TrialFileName;
+        int idx = fName2.indexOf("/Android");
+        if (idx==-1)
+            return new Pair<>("Не найдены данные приложения",null);
+        fName2 = fName2.substring(0,idx)+"/"+TrialFileName;
+        boolean b1 = new File(fName1).exists(); // В папке приложения
+        boolean b2 = new File(fName2).exists(); // В корневой папке
+        try{
+            if (!b1 && !b2){                // Начальая установка
+                saveCurrentTime(fName1);
+                saveCurrentTime(fName2);
+                return new Pair<>(null,TrialPeriod*24*60L);
+                }
+            if (b1 && b2){                  // Trail-период без удаления
+                long dd = loadCurrentTime(fName1);
+                return new Pair<>(null,TrialPeriod*24*30-((System.currentTimeMillis()-dd)/1000/60));
+                }
+            if (!b1 && b2){                 // Попытка повторной установки
+                long dd = loadCurrentTime(fName2);
+                saveCurrentTime(fName1,dd);
+                return new Pair<>(null,TrialPeriod*24*30-(System.currentTimeMillis()-dd)/1000/60);
+                }
+            if (b1 && !b2){                 // Нет в корневой папке - восстановить
+                long dd = loadCurrentTime(fName1);
+                saveCurrentTime(fName2,dd);
+                return new Pair<>(null,TrialPeriod*24*30-(System.currentTimeMillis()-dd)/1000/60);
+                }
+            } catch (Exception ee){
+                return new Pair<>("Ошибка файла: "+ee.toString(),null);
+                }
+            return null;
+            }
+    }

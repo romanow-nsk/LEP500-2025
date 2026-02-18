@@ -84,6 +84,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
     public volatile boolean shutDown = false;
     public boolean voiceRun = false;
     private AppData ctx;
+    private boolean notRegistered=false;
     //private MultiLayerNetwork network=null;
     //-------------- Постоянные параметры snn-core ---------------------------------------
     private final boolean p_Compress = false;        // Нет компрессии
@@ -409,6 +410,19 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 addToLog(false,"Приложение не зарегистрировано\nПолучить регистрационный код для",
                         18,0x00A00000);
                 addToLogButton("ID: " + getSoftwareId64(),true,null,null);
+                //-------------------------------- Без регистрации - trial-версия ------------------
+                romanow.abc.core.Pair<String,Long> vv = ctx.getTrialDayPeriod();
+                if (vv.o1!=null)
+                    addToLog(vv.o1);
+                else{
+                    if (vv.o2>0)
+                        addToLog("Пробная версия: осталось "+vv.o2+" дней");
+                    else{
+                        popupAndLog("Пробная версия: разрешение отозвано "+-vv.o2+" дней назад");
+                        notRegistered=true;
+                        }
+                    }
+                //----------------------------------------------------------------------------------
                 }
             else{
                 addToLog(false,"Приложение зарегистрировано\nПолная функциональность",
@@ -422,7 +436,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             //Object oo=null;
             //oo.toString();
             loadNeuralNetworkModel();
-        }
+            }
 
     public void clearLog() {
         log.removeAllViews();
@@ -853,6 +867,15 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
 
     public void createMenuList() {
         menuList.clear();
+        if (notRegistered){
+            menuList.add(new MenuItemAction("Выход") {
+                @Override
+                public void onSelect() {
+                    finish();
+                }
+                });
+            return;
+            }
         new MIArchive(this);
         if (!ctx.set().technicianMode) {
             new MIArchiveFull(this);

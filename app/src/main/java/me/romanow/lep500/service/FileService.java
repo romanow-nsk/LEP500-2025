@@ -45,7 +45,6 @@ public class FileService {
             //xs.toXML(oo,out);
         } catch (Exception ee) {
             ctx.popupToastFatal(ee);
-
         }
     }
 
