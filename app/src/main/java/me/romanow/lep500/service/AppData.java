@@ -350,17 +350,17 @@ public class AppData extends Application {
                 }
             if (b1 && b2){                  // Trail-период без удаления
                 long dd = loadCurrentTime(fName1);
-                return new Pair<>(null,TrialPeriod*24*30-((System.currentTimeMillis()-dd)/1000/60));
+                return new Pair<>(null,TrialPeriod*24*60-((System.currentTimeMillis()-dd)/1000/60));
                 }
             if (!b1 && b2){                 // Попытка повторной установки
                 long dd = loadCurrentTime(fName2);
                 saveCurrentTime(fName1,dd);
-                return new Pair<>(null,TrialPeriod*24*30-(System.currentTimeMillis()-dd)/1000/60);
+                return new Pair<>(null,TrialPeriod*24*60-(System.currentTimeMillis()-dd)/1000/60);
                 }
             if (b1 && !b2){                 // Нет в корневой папке - восстановить
                 long dd = loadCurrentTime(fName1);
                 saveCurrentTime(fName2,dd);
-                return new Pair<>(null,TrialPeriod*24*30-(System.currentTimeMillis()-dd)/1000/60);
+                return new Pair<>(null,TrialPeriod*24*60-(System.currentTimeMillis()-dd)/1000/60);
                 }
             } catch (Exception ee){
                 return new Pair<>("Ошибка файла: "+ee.toString(),null);
