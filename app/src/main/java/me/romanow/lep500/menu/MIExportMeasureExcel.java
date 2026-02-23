@@ -9,13 +9,13 @@ import me.romanow.lep500.service.AppData;
 import romanow.lep500.FileDescription;
 import romanow.lep500.FileDescriptionList;
 
-public class MIExport extends MenuItem{
-    public MIExport(MainActivity main0) {
+public class MIExportMeasureExcel extends MenuItem{
+    public MIExportMeasureExcel(MainActivity main0) {
         super(main0);
-        main.addMenuList(new MenuItemAction(AppData.ColorArchive,"Экспорт в Excel") {
+        main.addMenuList(new MenuItemAction(AppData.ColorArchive,"Измерения -> Excel") {
             @Override
             public void onSelect() {
-                main.selectMultiFromArchive("Экспорт в Excel",exportSelector);
+                main.selectMultiFromArchive("Измерения -> Excel",exportSelector);
                 }
             });
         }

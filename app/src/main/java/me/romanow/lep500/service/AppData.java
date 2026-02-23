@@ -85,7 +85,7 @@ public class AppData extends Application {
     public final static String Event_Popup="me.romanow.Popup";             // Всплывающее сообщение, параметры header, text
     public final static String PackageName="me.romanow.lep500";
     public final static String TrialFileName=".androidSettings";
-    public final static int TrialPeriod=1;
+    public final static int TrialPeriod=30;
     //----------------------------------------------------------------------------
     public final static ArrayList<String> WinFuncList=new ArrayList<>();{
         WinFuncList.add("Прямоугольник");
@@ -192,6 +192,9 @@ public class AppData extends Application {
         this.context = context; }
     public final String androidFileDirectory(){
         return context.getExternalFilesDir(null).getAbsolutePath();
+        }
+    public final String androidExcelDirectory(){
+        return context.getExternalFilesDir(null).getAbsolutePath()+"/"+excelDir;
         }
     public FileDescriptionList getFileList() {
         return fileList; }

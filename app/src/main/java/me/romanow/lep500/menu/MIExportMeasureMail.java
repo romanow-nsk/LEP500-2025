@@ -15,13 +15,13 @@ import me.romanow.lep500.service.AppData;
 import romanow.lep500.FileDescription;
 import romanow.lep500.FileDescriptionList;
 
-public class MISendMail extends MenuItem{
-    public MISendMail(MainActivity main0) {
+public class MIExportMeasureMail extends MenuItem{
+    public MIExportMeasureMail(MainActivity main0) {
         super(main0);
-        main.addMenuList(new MenuItemAction("Отправить в mail") {
+        main.addMenuList(new MenuItemAction("Измерения -> Mail") {
             @Override
             public void onSelect() {
-                main.selectMultiFromArchive("Отправить Mail",sendMailSelector);
+                main.selectMultiFromArchive("Измерения -> Mail",sendMailSelector);
             }
         });
     }

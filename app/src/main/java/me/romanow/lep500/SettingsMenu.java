@@ -116,11 +116,11 @@ public class SettingsMenu extends SettingsMenuBase{
                 });
             layout.setPadding(5, 5, 5, 40);
             trmain.addView(layout);
-            layout = createItem(set.technicianMode ? "Эксперт" : "Техник" ,"", new I_EventListener(){
+            layout = createItem(set.technicianMode ? "Техник->Эксперт" : "Эксперт->Техник" ,"", new I_EventListener(){
                 @Override
                 public void onEvent(String ss) {
                     try {
-                        new OKDialog(base, set.technicianMode ? "Эксперт" : "Техник", new I_EventListener() {
+                        new OKDialog(base, set.technicianMode ? "Техник->Эксперт" : "Эксперт->Техник", new I_EventListener() {
                             @Override
                             public void onEvent(String s) {
                                 if (s==null)

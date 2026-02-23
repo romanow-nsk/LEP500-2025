@@ -70,7 +70,6 @@ import romanow.lep500.*;
 import romanow.lep500.fft.*;
 import me.romanow.lep500.ble.*;
 
-import static me.romanow.lep500.Registration.fromBase64;
 import static me.romanow.lep500.Registration.toBase64;
 
 //import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -947,7 +946,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                     addToLog("Датчик: " + descriptor.btName + ": " + descriptor.btMAC);
             }
         });
-        if (isAllEnabled())
+        if (!ctx.set().technicianMode && isAllEnabled())
         menuList.add(new MenuItemAction(AppData.ColorMeasure,"Очистить список") {
             @Override
             public void onSelect() {
@@ -958,6 +957,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         });
         //---------------------- Измерения (-)-----------------------------------------------------------
         //------------------ Операции с архивом ----------------------------------------------------
+        /*
         if (ctx.set().technicianMode) {
             new MIFileProcess(this, false);
             new MIDeleteFromArchive(this);
@@ -965,17 +965,20 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             new MIGroupDestroy(this);
             }
         else{
+         ------------------------------------------------------------------------------------------*/
+        if (!ctx.set().technicianMode) {
             new MIDeleteFromArchive(this);
             new MIGroupCreate(this);
             new MIGroupDestroy(this);
-            new MIExport(this);
             new MIFileCopy(this);
             new MIFileProcess(this, false);
             new MIFileProcess(this, true);
             }
         //------------------------------------------------------------------------------------------
         new MIMap(this);
-        new MISendMail(this);
+        new MIExportMeasureExcel(this);
+        new MIExportMeasureMail(this);
+        new MIExportExcelMail(this);
         if (isAllEnabled() && !ctx.set().technicianMode)
             new MIArchiveExpertNote(this);
         if (isAllEnabled() && !ctx.set().technicianMode)
@@ -1006,7 +1009,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 });
             new MITestSignal(this);
             new MIAudioRecord(this);
-            new MIExportAndSendMail(this);
+            new MIExportMeasureExcelMail(this);
             }
         if (!ctx.set().technicianMode && ctx.set().fullInfo)
                 new MITestCase(this);
@@ -1016,7 +1019,9 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 new RegistrationMenu(MainActivity.this);
             }
             });
-        new MIAbout(this);
+        if (!ctx.set().technicianMode) {
+            new MIAbout(this);
+            }
         menuList.add(new MenuItemAction("Выход") {
             @Override
             public void onSelect() {
@@ -1193,6 +1198,28 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 for (int i = 0; i < ss.size(); i++)
                     if (selected[i])
                         out.add(ss.get(i));
+                setDefferedList(out);
+                selector.onSelect(out, false);
+                }
+            });
+        }
+
+    public void selectFromExcelArchive(String title, final I_ArchiveMultiSelector selector) {
+        final ArrayList<FileDescription> ss = createExcelArchive();
+        final ArrayList<FileDescription> vv = new ArrayList<>();
+        final ArrayList<String> list = new ArrayList<>();
+        for (FileDescription ff : ss){
+            list.add(ff.getOriginalFileName());
+            vv.add(ff);
+            }
+        addToLog("В выборке "+vv.size()+" файлов\n");
+        new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, new MultiListBoxListener() {
+            @Override
+            public void onSelect(boolean[] selected) {
+                FileDescriptionList out = new FileDescriptionList();
+                for (int i = 0; i < vv.size(); i++)
+                    if (selected[i])
+                        out.add(vv.get(i));
                 setDefferedList(out);
                 selector.onSelect(out, false);
                 }

@@ -456,6 +456,9 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
     public FileDescriptionList createDirArchive(){
         return createDirArchive(ctx.androidFileDirectory());
         }
+    public FileDescriptionList createExcelArchive(){
+        return createFileArchive(ctx.androidExcelDirectory());
+        }
     public FileDescriptionList createDirArchive(String path){
         File ff = new File(path);
         if (!ff.exists()) {
@@ -480,6 +483,28 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
             });
         return out;
         }
+    public FileDescriptionList createFileArchive(String path){
+        File ff = new File(path);
+        if (!ff.exists()) {
+            ff.mkdir();
+            }
+        FileDescriptionList out = new FileDescriptionList();
+        String zz[] = ff.list();
+        if (zz==null)
+            return out;
+        for(String ss : zz){
+            File file = new File(path+"/"+ss);
+            if (!file.isDirectory())
+                out.add(new FileDescription(ss));
+            }
+        out.sort(new I_FDComparator() {
+            @Override
+            public int compare(FileDescription o2, FileDescription o1) {
+                return o1.getOriginalFileName().compareTo(o2.getOriginalFileName());
+            }
+        });
+        return out;
+    }
 
     public void saveContext(){
         ctx.fileService.saveContext();

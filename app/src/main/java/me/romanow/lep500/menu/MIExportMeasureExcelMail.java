@@ -17,13 +17,13 @@ import me.romanow.lep500.service.AppData;
 import romanow.lep500.FileDescription;
 import romanow.lep500.FileDescriptionList;
 
-public class MIExportAndSendMail extends MenuItem{
-    public MIExportAndSendMail(MainActivity main0) {
+public class MIExportMeasureExcelMail extends MenuItem{
+    public MIExportMeasureExcelMail(MainActivity main0) {
         super(main0);
-        main.addMenuList(new MenuItemAction("Отправить Excel в mail") {
+        main.addMenuList(new MenuItemAction("Измерения -> Mail(Excel)") {
             @Override
             public void onSelect() {
-                main.selectMultiFromArchive("Отправить Excel в mail",exportAndSendMailSelector);
+                main.selectMultiFromArchive("Измерения -> Mail(Excel)",exportAndSendMailSelector);
             }
         });
     }
