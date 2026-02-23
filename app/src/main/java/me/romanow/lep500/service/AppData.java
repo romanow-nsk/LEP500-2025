@@ -44,7 +44,7 @@ import romanow.abc.core.utils.OwnDateTime;
 import romanow.lep500.FileDescriptionList;
 
 public class AppData extends Application {
-    public final static String apkVersion = "3.0.04, 18.02.2026";
+    public final static String apkVersion = "3.0.04, 23.02.2026";
     private final static String codeGenPassword="pi31415926";
     public final static String MAPKIT_API_KEY = "fda3e521-bbc6-4c75-9ec7-ccd4fdaa34d3";
     public final static int PopupShortDelay=4;              // Время короткого popup
@@ -85,7 +85,7 @@ public class AppData extends Application {
     public final static String Event_Popup="me.romanow.Popup";             // Всплывающее сообщение, параметры header, text
     public final static String PackageName="me.romanow.lep500";
     public final static String TrialFileName=".androidSettings";
-    public final static int TrialPeriod=30;
+    public final static int TrialPeriod=1;
     //----------------------------------------------------------------------------
     public final static ArrayList<String> WinFuncList=new ArrayList<>();{
         WinFuncList.add("Прямоугольник");

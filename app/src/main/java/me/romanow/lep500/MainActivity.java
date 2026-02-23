@@ -84,7 +84,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
     public volatile boolean shutDown = false;
     public boolean voiceRun = false;
     private AppData ctx;
-    private boolean notRegistered=false;
+    private boolean trialPeriod=false;                  // Пробный период
     //private MultiLayerNetwork network=null;
     //-------------- Постоянные параметры snn-core ---------------------------------------
     private final boolean p_Compress = false;        // Нет компрессии
@@ -415,11 +415,13 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 if (vv.o1!=null)
                     addToLog(vv.o1);
                 else{
-                    if (vv.o2>0)
+                    if (vv.o2>0){
                         addToLog("Пробная версия: осталось "+vv.o2+" дней");
+                        trialPeriod=true;
+                        }
                     else{
                         popupAndLog("Пробная версия: разрешение отозвано "+-vv.o2+" дней назад");
-                        notRegistered=true;
+                        trialPeriod=false;
                         }
                     }
                 //----------------------------------------------------------------------------------
@@ -867,7 +869,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
 
     public void createMenuList() {
         menuList.clear();
-        if (notRegistered){
+        if (!trialPeriod && !isAllEnabled()){
             menuList.add(new MenuItemAction("Выход") {
                 @Override
                 public void onSelect() {
@@ -895,7 +897,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             }
             });
         //---------------------- Измерения (+)-----------------------------------------------------------
-        if (isAllEnabled())
+        if (isAllEnabled() || trialPeriod)
         menuList.add(new MenuItemAction(AppData.ColorMeasure,"Измерение") {
             @Override
             public void onSelect() {
