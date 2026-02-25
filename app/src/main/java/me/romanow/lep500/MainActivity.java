@@ -387,8 +387,6 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                     menuDialog.create();
                 }
             });
-            if (isAllEnabled())
-                btViewFace.init();
             //------------------------------------------------
             //int[] surrogates = {0xD83D, 0xDC7D};
             //String title = "Звенящие опоры России "+
@@ -429,7 +427,9 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 addToLog(false,"Приложение зарегистрировано\nПолная функциональность",
                         18,AppData.ApplicationTextColor);
                 }
-            } catch (Exception ee) {
+            if (isAllEnabled())
+                btViewFace.init();
+        } catch (Exception ee) {
                 errorMes(createFatalMessage(ee, 10));
                 }
             //addToLogImage(R.drawable.status_green);
@@ -896,7 +896,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             }
             });
         //---------------------- Измерения (+)-----------------------------------------------------------
-        if (isAllEnabled() || trialPeriod)
+        if (isAllEnabled())
         menuList.add(new MenuItemAction(AppData.ColorMeasure,"Измерение") {
             @Override
             public void onSelect() {
@@ -978,7 +978,8 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         new MIMap(this);
         new MIExportMeasureExcel(this);
         new MIExportMeasureMail(this);
-        new MIExportExcelMail(this);
+        //new MIExportExcelMail(this);
+        new MIExportMeasureExcelMail(this);
         if (isAllEnabled() && !ctx.set().technicianMode)
             new MIArchiveExpertNote(this);
         if (isAllEnabled() && !ctx.set().technicianMode)
@@ -1009,7 +1010,6 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 });
             new MITestSignal(this);
             new MIAudioRecord(this);
-            new MIExportMeasureExcelMail(this);
             }
         if (!ctx.set().technicianMode && ctx.set().fullInfo)
                 new MITestCase(this);
@@ -1190,7 +1190,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         final ArrayList<String> list = new ArrayList<>();
         for (FileDescription ff : ss)
             list.add(dirList ? ff.getOriginalFileName() : ff.toString());
-        addToLog("В выборке "+ss.size()+" файлов\n");
+        //addToLog("В выборке "+ss.size()+" файлов\n");
         new MultiListBoxDialog(this, title+" ("+ss.size()+")", list, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
@@ -1212,7 +1212,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             list.add(ff.getOriginalFileName());
             vv.add(ff);
             }
-        addToLog("В выборке "+vv.size()+" файлов\n");
+        //addToLog("В выборке "+vv.size()+" файлов\n");
         new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
@@ -1235,7 +1235,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 list.add(ff.toString());
                 vv.add(ff);
                 }
-        addToLog("В выборке "+vv.size()+" файлов\n");
+        //addToLog("В выборке "+vv.size()+" файлов\n");
         new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
@@ -1446,7 +1446,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         }
     public boolean isAllEnabled(){
         String ss = ctx.loginSettings().getRegistrationCode();
-        return ss.equals(createRegistrationCode()) && ss.length()!=0;
+        return ss.equals(createRegistrationCode()) && ss.length()!=0 || trialPeriod;
         }
     public String getSoftwareId() {         // Закодированный
         String ss = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);

@@ -82,17 +82,7 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         fd = fd0;
         callNum++;
         }
-    public String createOriginalExcelFileName(){
-        String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
-        File ff = new File(dirName);
-        if (!ff.exists()){
-            ff.mkdir();
-            }
-        String pathName = dirName+"/"+fd.getOriginalFileName();
-        int k = pathName.lastIndexOf(".");
-        pathName = pathName.substring(0, k) + ".xlsx";
-        return pathName;
-        }
+
     public FFTExcelAdapter(BaseActivity main0){
         main = (MainActivity) main0;
         workbook = new XSSFWorkbook();
@@ -117,7 +107,9 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         mainRows.createCell(11,0).setCellValue("Анализ:");
         }
     @Override
-    public void onStart(double msOnStep) {}
+    public void onStart(double msOnStep) {
+
+    }
     @Override
     public void onFinish() {
         if (inputStat.getCount()==0){
@@ -235,22 +227,38 @@ public class FFTExcelAdapter implements FFTCallBackPlus {
         dataRows.sheet.setColumnWidth(colOffset+4,4000);
         //------------------------------------------------------------------------------------------
         }
-    public String createExcel(){
-        mainRows.sheet.setColumnWidth(0,5000);
-        for(int columnIndex = 0; columnIndex < callNum+1; columnIndex++)
-            mainRows.sheet.setColumnWidth(columnIndex+1,10000);
-        String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
+    public String createOriginalExcelFileName(){
+        String dirName = AppData.ctx().rootDirectory();
+        String ss= new OwnDateTime().dateTimeToString();
+        ss = ss.replace(":",".");
+        ss = ss.replace(" ","_");
+        dirName += "/LEP500";
         File ff = new File(dirName);
         if (!ff.exists()){
             ff.mkdir();
             }
-        String pathName = "Измерения ("+(callNum+1)+") "+new OwnDateTime().dateTimeToString()+".xlsx";
-        try (FileOutputStream out = new FileOutputStream(new File(dirName+"/"+pathName))) {
+        dirName += "/Выборка "+ss+".xlsx";
+        return dirName;
+        }
+    public String createExcel(){
+        mainRows.sheet.setColumnWidth(0,5000);
+        for(int columnIndex = 0; columnIndex < callNum+1; columnIndex++)
+            mainRows.sheet.setColumnWidth(columnIndex+1,10000);
+        //String dirName = AppData.ctx().androidFileDirectory()+"/"+ AppData.excelDir;
+        //File ff = new File(dirName);
+        //if (!ff.exists()){
+        //    ff.mkdir();
+        //    }
+        //String pathName = "Измерения ("+(callNum+1)+") "+new OwnDateTime().dateTimeToString()+".xlsx";
+        String pathName  = createOriginalExcelFileName();
+        try (FileOutputStream out = new FileOutputStream(new File(pathName))) {
             workbook.write(out);
             out.close();
-        } catch (IOException e) { main.addToLog("Ошибка экспорта: "+e.toString());  }
-        main.addToLog("Экспорт в Excel: "+fd.getOriginalFileName());
-        return dirName+"/"+pathName;
+            } catch (IOException e) {
+                main.addToLog("Ошибка экспорта: "+e.toString());
+                }
+        main.addToLog("Экспорт в Excel: "+pathName);
+        return pathName;
         }
     //----------------------------------------------------------------------------------------------
     private int rowNum=0;
