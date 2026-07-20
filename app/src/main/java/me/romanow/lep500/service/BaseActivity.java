@@ -1,5 +1,6 @@
 package me.romanow.lep500.service;
 
+import static me.romanow.lep500.service.AppData.ApplicationTextColor;
 import static romanow.abc.core.Utils.createFatalMessage;
 
 import android.app.AlertDialog;
@@ -55,6 +56,7 @@ import romanow.lep500.fft.FFTArray;
 import romanow.lep500.fft.FFTParams;
 import romanow.lep500.fft.FFTStatistic;
 import romanow.lep500.fft.I_Notify;
+import romanow.lep500.fft.ShortAnalyse;
 
 public abstract class BaseActivity extends AppCompatActivity implements I_Notify {
     //------------------------------------------------------------------------------
@@ -72,10 +74,11 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
     public abstract void addToLog(String ss, int textSize);
     public abstract void addToLogHide(String ss);
     public abstract void addToLog(boolean fullInfoMes, final String ss, final int textSize, final int textColor);
+    public abstract void addToLog(boolean fullInfoMes, final String ss, final int textSize, final int textColor, final int imgRes);
     public abstract void popupAndLog(String ss);
     public abstract void showStatisticFull(FFTStatistic inputStat, int idx);
     public void addToLog(String ss){
-        addToLog(false,ss,0,AppData.ApplicationTextColor);
+        addToLog(false,ss,0, ApplicationTextColor);
         }
     protected ListBoxDialog menuDialog=null;
     private ArrayList<FFTStatistic> deffered = new ArrayList<>();
@@ -131,7 +134,7 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
                 if (error)
                     addToLog(false,mes,14,0x00FF0000);
                 else
-                    addToLog(false,mes,14,AppData.ApplicationTextColor);
+                    addToLog(false,mes,14, ApplicationTextColor);
                 }
             if (popup)
                 popupToast(drawId,mes);
@@ -239,6 +242,46 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
             paintOneSpectrum(multiGraph,statistic.getnFirst(),statistic.getFreqStep(),statistic.getNormalized(),getPaintColor(i));
             }
         }
+    public void defferedFinishBaseFreq(){
+        normalize();
+        int ignored=0;
+        ArrayList<Double> vals = new ArrayList<>();
+        for(int i=0;i<deffered.size();i++){
+            final FFTStatistic statistic = deffered.get(i);
+            if (!statistic.isValid()){
+                ignored++;
+                continue;
+                }
+            int color = getPaintColor(i);
+            //String title = Values.constMap().getGroupMapByValue("EState").get(statistic.getFileDescription().getExpertNote()).title();
+            //if (title == null)
+            //    title = "...";
+            ExtremeList list = statistic.createExtrems(0, ctx.set());
+            ShortAnalyse ss = list.testAlarmCommon(ctx.set(), statistic.getFreqStep());
+            if (ss.mode == Values.MSNormal){
+                addToLog(false,statistic.getMessage()+" "+statistic.getName(),middleTextSize,color);
+                vals.add(ss.f0);
+                int resColor = AppData.StateColors.get(ss.mode);
+                addToLog(false, ss.info, middleTextSize, color, resColor);
+                paintOneSpectrum(multiGraph,statistic.getnFirst(),statistic.getFreqStep(),statistic.getNormalized(),getPaintColor(i));
+                }
+            }
+        if (vals.size()==0)
+            addToLog(false, "Нет корректных измерений", greatTextSize, ApplicationTextColor);
+        else{
+            double sum = 0;
+            for (double vv : vals)
+                sum += vv;
+            sum = sum / vals.size();
+            double disp = 0;
+            for (double vv : vals)
+                disp += (vv-sum)*(vv-sum);
+            disp = disp / vals.size();
+            disp = Math.sqrt(disp);
+            String ss = String.format("Корректных измерений: %d из %d\nБазовая частота = %5.2f Ст.откл. = %5.2f (гц) ",vals.size(),deffered.size(),sum,disp);
+            addToLog(false, ss, greatTextSize, ApplicationTextColor);
+            }
+    }
     public void defferedAdd(FFTStatistic inputStat){
         deffered.add(inputStat);
         }

@@ -523,9 +523,9 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
            }
          */
         ExtremeList list = inputStat.createExtrems(0, ctx.set());
-        Pair<String, Integer> ss = list.testAlarmBase(ctx.set(), inputStat.getFreqStep());
-        int resColor = AppData.StateColors.get(ss.o2);
-        addToLog(false, ss.o1, middleTextSize, color, resColor);
+        ShortAnalyse ss = list.testAlarmCommon(ctx.set(), inputStat.getFreqStep());
+        int resColor = AppData.StateColors.get(ss.mode);
+        addToLog(false, ss.info, middleTextSize, color, resColor);
         }
 
     @Override
@@ -633,7 +633,6 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         intent = Intent.createChooser(chooseFile, "Выбрать txt");
         startActivityForResult(intent, resultCode);
         }
-
 
     public String getFileName(Uri uri) {
         String result = null;
@@ -975,6 +974,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             new MIFileProcess(this, true);
             }
         //------------------------------------------------------------------------------------------
+        new MIBaseFreq(this);
         new MIMap(this);
         new MIExportMeasureExcel(this);
         new MIExportMeasureMail(this);

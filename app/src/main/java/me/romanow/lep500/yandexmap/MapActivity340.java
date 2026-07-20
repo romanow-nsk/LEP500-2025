@@ -175,6 +175,9 @@ public class MapActivity340 extends BaseActivity {
     public void addToLog(boolean fullInfoMes, String ss, int textSize, int textColor) { }
 
     @Override
+    public void addToLog(boolean fullInfoMes, String ss, int textSize, int textColor, int imgRes) { }
+
+    @Override
     public void popupAndLog(String ss) {
         popupInfo(ss);
         }
