@@ -974,7 +974,8 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             new MIFileProcess(this, true);
             }
         //------------------------------------------------------------------------------------------
-        new MIBaseFreq(this);
+        new MIBaseFreqAlong(this);
+        new MIBaseFreqAcross(this);
         new MIMap(this);
         new MIExportMeasureExcel(this);
         new MIExportMeasureMail(this);

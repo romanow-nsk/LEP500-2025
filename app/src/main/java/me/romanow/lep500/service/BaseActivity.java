@@ -242,10 +242,11 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
             paintOneSpectrum(multiGraph,statistic.getnFirst(),statistic.getFreqStep(),statistic.getNormalized(),getPaintColor(i));
             }
         }
-    public void defferedFinishBaseFreq(){
+    public void defferedFinishBaseFreq(boolean across){
         normalize();
         int ignored=0;
         ArrayList<Double> vals = new ArrayList<>();
+        ArrayList<Double> valsDecrem = new ArrayList<>();
         for(int i=0;i<deffered.size();i++){
             final FFTStatistic statistic = deffered.get(i);
             if (!statistic.isValid()){
@@ -261,6 +262,7 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
             if (ss.mode == Values.MSNormal){
                 addToLog(false,statistic.getMessage()+" "+statistic.getName(),middleTextSize,color);
                 vals.add(ss.f0);
+                valsDecrem.add(ss.decrement);
                 int resColor = AppData.StateColors.get(ss.mode);
                 addToLog(false, ss.info, middleTextSize, color, resColor);
                 paintOneSpectrum(multiGraph,statistic.getnFirst(),statistic.getFreqStep(),statistic.getNormalized(),getPaintColor(i));
@@ -270,16 +272,29 @@ public abstract class BaseActivity extends AppCompatActivity implements I_Notify
             addToLog(false, "Нет корректных измерений", greatTextSize, ApplicationTextColor);
         else{
             double sum = 0;
+            double sumDecr = 0;
             for (double vv : vals)
                 sum += vv;
             sum = sum / vals.size();
+            for (double vv : valsDecrem)
+                sumDecr += vv;
+            sumDecr = sumDecr / valsDecrem.size();
             double disp = 0;
             for (double vv : vals)
                 disp += (vv-sum)*(vv-sum);
             disp = disp / vals.size();
             disp = Math.sqrt(disp);
-            String ss = String.format("Корректных измерений: %d из %d\nБазовая частота = %5.2f Ст.откл. = %5.2f (гц) ",vals.size(),deffered.size(),sum,disp);
+            String ss = String.format("Корректных измерений: %d из %d\nБазовая частота = %5.2f(+/-%5.2f) (гц)\nДекремент=%5.2f",vals.size(),deffered.size(),sum,disp,sumDecr);
             addToLog(false, ss, greatTextSize, ApplicationTextColor);
+            if (across){
+                ctx.settings.baseFreqAcross=sum;
+                ctx.settings.baseFreqAcrossCount=vals.size();
+                }
+            else{
+                ctx.settings.baseFreqAlong=sum;
+                ctx.settings.baseFreqAlongCount=vals.size();
+                }
+            saveContext();
             }
     }
     public void defferedAdd(FFTStatistic inputStat){

@@ -18,7 +18,7 @@ public class SettingsMenu extends SettingsMenuBase{
     public void createDialog(LinearLayout trmain){
         try {
             LEP500Settings set = AppData.ctx().set();
-            LinearLayout layout = createItem("Осн.диапазон (мин)", String.format("%4.2f",set.mainFreqLowLimit), new I_EventListener(){
+            LinearLayout layoutMin = createItem("Осн.диапазон (мин)", String.format("%4.2f",set.mainFreqLowLimit), new I_EventListener(){
                 @Override
                 public void onEvent(String ss) {
                     try {
@@ -29,8 +29,8 @@ public class SettingsMenu extends SettingsMenuBase{
                             base.popupInfo("Формат числа");}
                             }
                 });
-            trmain.addView(layout);
-            layout = createItem("Осн.диапазон (макс)", String.format("%4.2f",set.mainFreqHighLimit), new I_EventListener(){
+            trmain.addView(layoutMin);
+            LinearLayout layoutMax = createItem("Осн.диапазон (макс)", String.format("%4.2f",set.mainFreqHighLimit), new I_EventListener(){
                 @Override
                 public void onEvent(String ss) {
                     try {
@@ -41,8 +41,8 @@ public class SettingsMenu extends SettingsMenuBase{
                             base.popupInfo("Формат числа");}
                     }
                 });
-            trmain.addView(layout);
-            layout = createItem("Диапазон НЧ", String.format("%4.2f",set.lowFreqLimit), new I_EventListener(){
+            trmain.addView(layoutMax);
+            LinearLayout layout = createItem("Диапазон НЧ", String.format("%4.2f",set.lowFreqLimit), new I_EventListener(){
                 @Override
                 public void onEvent(String ss) {
                     try {
@@ -54,6 +54,32 @@ public class SettingsMenu extends SettingsMenuBase{
                 }
             });
             trmain.addView(layout);
+            //-------------------------------------------------------------------------------------------------------
+            layout = createItem("Частота продольная", String.format("%4.2f (%d)",set.baseFreqAlong,set.baseFreqAlongCount), null);
+            trmain.addView(layout);
+            layout = createItem("Частота поперечная", String.format("%4.2f (%d)",set.baseFreqAcross,set.baseFreqAcrossCount), null);
+            trmain.addView(layout);
+            if (set.baseFreqAlongCount!=0 && set.baseFreqAcrossCount!=0){
+                final double v1 = (set.baseFreqAcross+set.baseFreqAlong)/2;
+                final double v2 = Math.abs(set.baseFreqAcross-set.baseFreqAlong);
+                final double proc = v2/v1*100;
+                final double baseFreq = proc <= AppData.BaseFreqDiffProc ? v1 : set.baseFreqAcross;
+                layout = createItem("Новый осн.диапазон", String.format("%4.2f (%d%%)",baseFreq,(int)proc),false,false,true, new I_EventListener(){
+                    @Override
+                    public void onEvent(String ss) {
+                        double fMin= baseFreq*(100.-AppData.BaseFreqWidthProc)/100;
+                        double fMax= baseFreq*(100.+AppData.BaseFreqWidthProc)/100;
+                        base.popupInfo(String.format("Изменение основного диапазона: %4.2f...%4.2f",fMin,fMax));
+                        set.mainFreqLowLimit=fMin;
+                        set.mainFreqHighLimit=fMax;
+                        settingsChanged();
+                        setItemValue(layoutMin,String.format("%4.2f",fMin));
+                        setItemValue(layoutMax,String.format("%4.2f",fMax));
+                        }
+                    });
+            trmain.addView(layout);
+                }
+            //------------------------------------------------------------------------------------------------------
             layout = createItem("% ампл.смежного", ""+set.neighborPeakAmplProc, new I_EventListener(){
                 @Override
                 public void onEvent(String ss) {

@@ -58,6 +58,9 @@ public class AppData extends Application {
     public final static int ColorArchive = 0xFFFFD700;
     public final static int ColorServer = 0xFF87CEFA;
     public final static int ColorMeasure = 0xFFE0FFFF;
+    public final static int ColorGray = 0xFFE0E0E0;
+    public final static int BaseFreqDiffProc=10;
+    public final static int BaseFreqWidthProc=15;
     //---------------------------------------------------------------------------------------------
     public final static int CStateGray=0;          // Состояние соединения не определено
     public final static int CStateRed=1;           // Нет соединения

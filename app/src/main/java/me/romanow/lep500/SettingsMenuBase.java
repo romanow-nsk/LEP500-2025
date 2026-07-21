@@ -30,6 +30,15 @@ public abstract class SettingsMenuBase {
         return createItem(name,value,false,false,lsn);
         }
     protected LinearLayout createItem(String name, String value, boolean shortSize, boolean textType, final I_EventListener lsn){
+        return createItem(name,value,shortSize,textType,false,lsn);
+        }
+    protected void setItemValue(LinearLayout item,String value){
+        final EditText tt=(EditText) item.findViewById(R.id.dialog_settings_value);
+        value = value.replace(",",".");
+        tt.setText(""+value);
+
+    }
+    protected LinearLayout createItem(String name, String value, boolean shortSize, boolean textType, boolean noEdit, final I_EventListener lsn){
         LinearLayout xx=(LinearLayout)base.getLayoutInflater().inflate(
                 shortSize ? R.layout.settings_item_short : R.layout.settings_item, null);
         xx.setPadding(5, 5, 5, 5);
@@ -40,25 +49,33 @@ public abstract class SettingsMenuBase {
         TextView img=(TextView)xx.findViewById(R.id.dialog_settings_name);
         img.setText(name);
         img.setTextColor(AppData.ColorCommon);
-        img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if (lsn!=null){
+            img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                 lsn.onEvent(tt.getText().toString());
                 }
-            });
-        img.setClickable(true);
-        tt.setTextColor(AppData.ColorCommon);
-        tt.setInputType(textType ? InputType.TYPE_CLASS_TEXT : (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL));
-        //tt.setInputType(textType ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER );
-        tt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId==6 || actionId==5){
-                    lsn.onEvent(v.getText().toString());
-                    }
-                return false;
+                });
+            img.setClickable(true);
+            tt.setTextColor(AppData.ColorCommon);
+            tt.setInputType(textType ? InputType.TYPE_CLASS_TEXT : (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL));
+            if (!noEdit){
+                //tt.setInputType(textType ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER );
+                tt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId==6 || actionId==5){
+                            lsn.onEvent(v.getText().toString());
+                            }
+                        return false;
+                        }
+                    });
+                }
             }
-        });
+        else{
+            img.setTextColor(AppData.ColorGray);
+            tt.setTextColor(AppData.ColorGray);
+            }
         return xx;
         }
     protected LinearLayout createListBox(String name, final ArrayList<String> values, int idx, final I_ListBoxListener lsn){

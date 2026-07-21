@@ -8,13 +8,13 @@ import me.romanow.lep500.R;
 import romanow.lep500.FileDescription;
 import romanow.lep500.FileDescriptionList;
 
-public class MIBaseFreq extends MenuItem{
-    public MIBaseFreq(MainActivity main0) {
+public class MIBaseFreqAlong extends MenuItem{
+    public MIBaseFreqAlong(MainActivity main0) {
         super(main0);
-        main.addMenuList(new MenuItemAction("Базовая частота") {
+        main.addMenuList(new MenuItemAction("Базовая частота продольная") {
             @Override
             public void onSelect() {
-                main.selectMultiFromArchive("Проcмотр архива",procViewMultiSelector);
+                main.selectMultiFromArchive("Продольные измерения",procViewMultiSelector);
             }
         });
     }
@@ -27,7 +27,7 @@ public class MIBaseFreq extends MenuItem{
             for (FileDescription ff : fd){
                 main.procArchive(ff,false);
                 }
-            main.defferedFinishBaseFreq();
+            main.defferedFinishBaseFreq(false);
             }
     };
 }

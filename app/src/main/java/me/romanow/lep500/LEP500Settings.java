@@ -13,6 +13,10 @@ public class LEP500Settings extends LEP500Params {
     public String mailPass="";
     public String mailSecur="starttls";
     public int mailPort=587;
+    public double baseFreqAlong=0;              // Базовая частота продольная
+    public int baseFreqAlongCount=0;
+    public double baseFreqAcross=0;             // Базовая частота поперечная
+    public int baseFreqAcrossCount=0;
     public String fatalMessage="";              // Текст фатального сообщения при перезагрузке
     public boolean technicianMode=true;         // Полнофункциональный режим
     public ArrayList<BTDescriptor> knownSensors=new ArrayList<>();
