@@ -19,8 +19,13 @@ public class MultiListBoxDialog {
         MultiListBoxListener ls=null;
         boolean second=false;
         Activity parent=null;
+        private float textSize=0;
         ArrayList<TextView> viewList = new ArrayList<>();
-    public MultiListBoxDialog(Activity activity, String title, ArrayList<String> src, MultiListBoxListener ff){
+    public MultiListBoxDialog(Activity activity, String title, ArrayList<String> src,  MultiListBoxListener ff){
+        this(activity,title,src,0,ff);
+        }
+    public MultiListBoxDialog(Activity activity, String title, ArrayList<String> src, float textSize,MultiListBoxListener ff){
+        this.textSize = textSize;
         try {
             parent=activity;
             mark = new boolean[src.size()];
@@ -73,6 +78,8 @@ public class MultiListBoxDialog {
                 int bg=(mark[i] ? R.drawable.background_head_select : R.drawable.background_head);
                 tt.setBackgroundResource(bg);
                 tt.setTextColor(AppData.ColorCommon);
+                if (textSize!=0)
+                    tt.setTextSize(textSize);
                 tt.setOnClickListener(new OnClickListener(){
                     public void onClick(final View arg0) {
                         mark[ii] = !mark[ii];

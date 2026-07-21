@@ -7,6 +7,7 @@ import romanow.lep500.FileDescription;
 import romanow.lep500.FileDescriptionList;
 
 import static me.romanow.lep500.MainActivity.ViewProcHigh;
+import static me.romanow.lep500.MainActivity.ViewProcNorm;
 
 public class MIArchive extends MenuItem{
     public MIArchive(MainActivity main0) {

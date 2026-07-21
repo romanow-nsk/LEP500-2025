@@ -97,6 +97,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
     private final int GraphBackColor = 0x00A0C0C0;
     final public static String archiveFile = "LEP500Archive.json";
     final public static double ViewProcHigh = 0.6;
+    final public static double ViewProcNorm = 0.5;
     final public static String VoiceFile = "LEP500.wave";
     //------------------------------------------------------------------------------------
     public static final int nFirstMax = 10;  // Количество максимумов в статистике (вывод)
@@ -1176,7 +1177,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             @Override
             public void onCancel() {
             }
-        }).create();
+        }).setTextSize(17).create();
     }
 
     public void selectMultiFromArchive(String title, final I_ArchiveMultiSelector selector) {
@@ -1192,7 +1193,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
         for (FileDescription ff : ss)
             list.add(dirList ? ff.getOriginalFileName() : ff.toString());
         //addToLog("В выборке "+ss.size()+" файлов\n");
-        new MultiListBoxDialog(this, title+" ("+ss.size()+")", list, new MultiListBoxListener() {
+        new MultiListBoxDialog(this, title+" ("+ss.size()+")", list, 17, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
                 FileDescriptionList out = new FileDescriptionList();
@@ -1214,7 +1215,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
             vv.add(ff);
             }
         //addToLog("В выборке "+vv.size()+" файлов\n");
-        new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, new MultiListBoxListener() {
+        new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, 17, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
                 FileDescriptionList out = new FileDescriptionList();
@@ -1237,7 +1238,7 @@ public class MainActivity extends BaseActivity {     //!!!!!!!!!!!!!!!!!!!!!!!!!
                 vv.add(ff);
                 }
         //addToLog("В выборке "+vv.size()+" файлов\n");
-        new MultiListBoxDialog(this, title+" ("+vv.size()+")", list, new MultiListBoxListener() {
+        new MultiListBoxDialog(this, title+" ("+vv.size()+")", list,17, new MultiListBoxListener() {
             @Override
             public void onSelect(boolean[] selected) {
                 FileDescriptionList out = new FileDescriptionList();
